@@ -733,3 +733,149 @@ func (_m *EC2API) DescribeInstanceAttribute(_a0 *ec2.DescribeInstanceAttributeIn
 	}
 	return
 }
+
+func (_m *EC2API) CreateTags(_a0 *ec2.CreateTagsInput) (output *ec2.CreateTagsOutput, err error) {
+	output = &ec2.CreateTagsOutput{}
+	if err := _m.recorder.CheckError("CreateTags"); err != nil {
+		return output, err
+	}
+	_m.recorder.Record("CreateTags")
+	returns, exist := _m.recorder.giveRecordedOutput("CreateTags", _a0)
+	if exist {
+		assertedErr, _ := returns[1].(error)
+		return returns[0].(*ec2.CreateTagsOutput), assertedErr
+	}
+	//if prefix is eni then update network interface tag
+	for _, resourceId := range _a0.Resources {
+		if strings.HasPrefix(*resourceId, "eni") {
+			// update tag for network interface
+			networkInterfaceCard, ok := _m.networkinterfaces[*resourceId]
+			if !ok {
+				return output, errors.New("network interface not found")
+			}
+			networkInterfaceCard.TagSet = _a0.Tags
+			_m.networkinterfaces[*resourceId] = networkInterfaceCard
+		}
+	}
+	return
+}
+
+// DescribeNetworkInterfaces provides a mock function with given fields: _a0
+func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesInput) (output *ec2.DescribeNetworkInterfacesOutput, err error) {
+	output = &ec2.DescribeNetworkInterfacesOutput{}
+	if err := _m.recorder.CheckError("DescribeNetworkInterfaces"); err != nil {
+		return output, err
+	}
+	_m.recorder.Record("DescribeNetworkInterfaces")
+	returns, exist := _m.recorder.giveRecordedOutput("DescribeNetworkInterfaces", _a0)
+	if exist {
+		assertedErr, _ := returns[1].(error)
+		return returns[0].(*ec2.DescribeNetworkInterfacesOutput), assertedErr
+	}
+
+	filteredNetworkInterfaces := []*ec2.NetworkInterface{}
+	for _, id := range _a0.NetworkInterfaceIds {
+		val, ok := _m.networkinterfaces[*id]
+		if ok {
+			filteredNetworkInterfaces = append(filteredNetworkInterfaces, val)
+		}
+	}
+	if len(_a0.Filters) == 0 {
+		output.NetworkInterfaces = filteredNetworkInterfaces
+		return
+	}
+
+	if len(filteredNetworkInterfaces) == 0 {
+		for _, val := range _m.networkinterfaces {
+			filteredNetworkInterfaces = append(filteredNetworkInterfaces, val)
+		}
+	}
+
+	furtherFilteredNetworkInterface := []*ec2.NetworkInterface{}
+
+	for _, val := range filteredNetworkInterfaces {
+		for _, filter := range _a0.Filters {
+			if *filter.Name == "vpc-id" {
+				for _, vpcid := range filter.Values {
+					if *val.VpcId == *vpcid {
+						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+					}
+				}
+			}
+		}
+	}
+
+	if len(furtherFilteredNetworkInterface) != 0 {
+		filteredNetworkInterfaces = furtherFilteredNetworkInterface
+		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
+	}
+
+	for _, val := range filteredNetworkInterfaces {
+		for _, filter := range _a0.Filters {
+			if *filter.Name == "subnet-id" {
+				for _, subnetid := range filter.Values {
+					if *val.SubnetId == *subnetid {
+						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+					}
+				}
+			}
+		}
+	}
+
+	if len(furtherFilteredNetworkInterface) != 0 {
+		filteredNetworkInterfaces = furtherFilteredNetworkInterface
+		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
+	}
+
+	for _, val := range filteredNetworkInterfaces {
+		for _, filter := range _a0.Filters {
+			if *filter.Name == "availabilityZone" {
+				for _, availabilityZone := range filter.Values {
+					if *val.AvailabilityZone == *availabilityZone {
+						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+					}
+				}
+			}
+		}
+	}
+
+	if len(furtherFilteredNetworkInterface) != 0 {
+		filteredNetworkInterfaces = furtherFilteredNetworkInterface
+		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
+	}
+
+	for _, val := range filteredNetworkInterfaces {
+		for _, filter := range _a0.Filters {
+			if *filter.Name == "availabilityZone" {
+				for _, availabilityZone := range filter.Values {
+					if *val.AvailabilityZone == *availabilityZone {
+						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+					}
+				}
+			}
+		}
+	}
+	if len(furtherFilteredNetworkInterface) != 0 {
+		filteredNetworkInterfaces = furtherFilteredNetworkInterface
+		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
+	}
+
+	for _, val := range filteredNetworkInterfaces {
+		for _, filter := range _a0.Filters {
+			if strings.HasPrefix("tag", *filter.Name) {
+				// get the tag name
+				tagName := strings.Split(*filter.Name, ":")[1]
+				tagValue := *filter.Values[0]
+				for _, tag := range val.TagSet {
+					if *tag.Key == tagName {
+						if *tag.Value == tagValue {
+							furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+						}
+					}
+				}
+			}
+		}
+	}
+	output.NetworkInterfaces = furtherFilteredNetworkInterface
+	return
+}
