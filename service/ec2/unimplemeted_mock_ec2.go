@@ -18,11 +18,6 @@ import ec2 "github.com/aws/aws-sdk-go/service/ec2"
 
 import request "github.com/aws/aws-sdk-go/aws/request"
 
-// AssociateAddress provides a mock function with given fields: _a0
-func (_m *EC2API) AssociateAddress(_a0 *ec2.AssociateAddressInput) (output *ec2.AssociateAddressOutput, err error) {
-
-	return
-}
 
 func (_m *EC2API) ReleaseAddressRequest(*ec2.ReleaseAddressInput) (r *request.Request, output *ec2.ReleaseAddressOutput) {
 	return

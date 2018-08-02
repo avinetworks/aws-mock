@@ -879,3 +879,26 @@ func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesIn
 	output.NetworkInterfaces = furtherFilteredNetworkInterface
 	return
 }
+
+// AssociateAddress provides a mock function with given fields: _a0
+func (_m *EC2API) AssociateAddress(_a0 *ec2.AssociateAddressInput) (output *ec2.AssociateAddressOutput, err error) {
+	output = &ec2.AssociateAddressOutput{}
+	networkInterfaceCard, ok := _m.networkinterfaces[*_a0.NetworkInterfaceId]
+	if !ok {
+		return output, errors.New("network interface not found")
+	}
+	for i, privateIP := range networkInterfaceCard.PrivateIpAddresses {
+		if *privateIP.PrivateIpAddress == *_a0.PrivateIpAddress {
+			privateIP.Association.AllocationId = _a0.AllocationId
+			privateIP.Association.PublicIp = _a0.PublicIp
+			associationId, err := uuid.NewV4()
+			if err != nil {
+				return output, err
+			}
+			associationIdStr := "fip-alloc-" + associationId.String()
+			privateIP.Association.AssociationId = &associationIdStr
+			networkInterfaceCard.PrivateIpAddresses[i] = privateIP
+		}
+	}
+	return
+}
