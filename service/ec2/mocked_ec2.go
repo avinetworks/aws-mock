@@ -14,6 +14,7 @@ package ec2
 
 import (
 	"strings"
+	"time"
 
 	randomdata "github.com/Pallinder/go-randomdata"
 	ec2 "github.com/aws/aws-sdk-go/service/ec2"
@@ -204,13 +205,13 @@ func (_m *EC2API) DescribeSubnets(_a0 *ec2.DescribeSubnetsInput) (output *ec2.De
 	for _, val := range _a0.SubnetIds {
 		for _, associatedsubnet := range _m.vpcassocaiatedsubnet {
 			for _, subnet := range associatedsubnet {
-				if val == subnet.SubnetId {
+				if *val == *subnet.SubnetId {
 					filteredSubnets = append(filteredSubnets, subnet)
 				}
 			}
 		}
 	}
-	if len(_a0.Filters) == 0 {
+	if len(_a0.Filters) != 0 {
 		output.Subnets = filteredSubnets
 		return
 	}
@@ -345,6 +346,7 @@ func (_m *EC2API) CreateNetworkInterface(_a0 *ec2.CreateNetworkInterfaceInput) (
 			break
 		}
 	}
+	primary := true
 	privateDnsName := "ip-" + strings.Replace(hostForCidr, ".", "-", -1) + ".ap-southeast-1.compute.internal"
 	ntwInterface := &ec2.NetworkInterface{
 		Description:        _a0.Description,
@@ -358,6 +360,7 @@ func (_m *EC2API) CreateNetworkInterface(_a0 *ec2.CreateNetworkInterfaceInput) (
 			&ec2.NetworkInterfacePrivateIpAddress{
 				PrivateIpAddress: &hostForCidr,
 				PrivateDnsName:   &privateDnsName,
+				Primary:          &primary,
 			},
 		},
 	}
@@ -625,15 +628,18 @@ func (_m *EC2API) AssignPrivateIpAddresses(_a0 *ec2.AssignPrivateIpAddressesInpu
 			exist, _ := in_array(hostForCidr, assignedIps)
 			if !exist {
 				randomSecondaryIps = append(randomSecondaryIps, hostForCidr)
-
+				break
 			}
+			time.Sleep(1 * time.Second)
 		}
 	}
+	primary := false
 	for _, secondaryip := range randomSecondaryIps {
 		privateDnsName := "ip-" + strings.Replace(secondaryip, ".", "-", -1) + ".ap-southeast-1.compute.internal"
 		networkInterface.PrivateIpAddresses = append(networkInterface.PrivateIpAddresses, &ec2.NetworkInterfacePrivateIpAddress{
 			PrivateIpAddress: &secondaryip,
 			PrivateDnsName:   &privateDnsName,
+			Primary:          &primary,
 		})
 	}
 	_m.networkinterfaces[*_a0.NetworkInterfaceId] = networkInterface
