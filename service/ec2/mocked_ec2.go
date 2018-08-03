@@ -49,7 +49,7 @@ var AVI_STANDARD_ELASTIC_ALLOCATION_DOMAIN string = "aws"
 var _ ec2iface.EC2API = &EC2API{}
 
 //supported filters
-var supportedsubnetfilter []string = []string{"vpc-id", "availabilityZone", "ipv6-cidr-block-association.association-id", "ipv6-cidr-block-association.state", "ipv6-cidr-block-association.ipv6-cidr-block"}
+var supportedsubnetfilter []string = []string{"vpc-id", "availabilityZone", "cidrBlock"}
 
 func New() *EC2API {
 	// aws allocate default security group to every instances
@@ -227,63 +227,56 @@ func (_m *EC2API) DescribeSubnets(_a0 *ec2.DescribeSubnetsInput) (output *ec2.De
 	if !doesHaveSupportedFilter {
 		return
 	}
+
+	if len(filteredSubnets) == 0 {
+		for _, associatedsubnet := range _m.vpcassocaiatedsubnet {
+			for _, subnet := range associatedsubnet {
+				filteredSubnets = append(filteredSubnets, subnet)
+			}
+		}
+	}
 	furtherFilteredSubnet := []*ec2.Subnet{}
 
-	if len(filteredSubnets) != 0 {
-		// TODO: @sch00lb0y can be refactored
+	for _, val := range filteredSubnets {
 		for _, filter := range _a0.Filters {
 			if *filter.Name == "vpc-id" {
-				for _, value := range filter.Values {
-					for _, filterSubnet := range filteredSubnets {
-						if filterSubnet.VpcId == value {
-							furtherFilteredSubnet = append(furtherFilteredSubnet, filterSubnet)
-						}
+				for _, vpcid := range filter.Values {
+					if *val.VpcId == *vpcid {
+						furtherFilteredSubnet = append(furtherFilteredSubnet, val)
 					}
 				}
 			}
+		}
+	}
 
+	if len(furtherFilteredSubnet) != 0 {
+		filteredSubnets = furtherFilteredSubnet
+		furtherFilteredSubnet = []*ec2.Subnet{}
+	}
+
+	for _, val := range filteredSubnets {
+		for _, filter := range _a0.Filters {
 			if *filter.Name == "availabilityZone" {
-				for _, value := range filter.Values {
-					for _, filterSubnet := range filteredSubnets {
-						if filterSubnet.AvailabilityZone == value {
-							furtherFilteredSubnet = append(furtherFilteredSubnet, filterSubnet)
-						}
+				for _, availabilityZone := range filter.Values {
+					if *val.AvailabilityZone == *availabilityZone {
+						furtherFilteredSubnet = append(furtherFilteredSubnet, val)
 					}
 				}
 			}
+		}
+	}
 
-			if *filter.Name == "ipv6-cidr-block-association.association-id" {
-				for _, value := range filter.Values {
-					for _, filterSubnet := range filteredSubnets {
-						for _, cidrBlock := range filterSubnet.Ipv6CidrBlockAssociationSet {
-							if value == cidrBlock.AssociationId {
-								furtherFilteredSubnet = append(furtherFilteredSubnet, filterSubnet)
-							}
-						}
-					}
-				}
-			}
+	if len(furtherFilteredSubnet) != 0 {
+		filteredSubnets = furtherFilteredSubnet
+		furtherFilteredSubnet = []*ec2.Subnet{}
+	}
 
-			if *filter.Name == "ipv6-cidr-block-association.state" {
-				for _, value := range filter.Values {
-					for _, filterSubnet := range filteredSubnets {
-						for _, cidrBlock := range filterSubnet.Ipv6CidrBlockAssociationSet {
-							if value == cidrBlock.Ipv6CidrBlockState.State {
-								furtherFilteredSubnet = append(furtherFilteredSubnet, filterSubnet)
-							}
-						}
-					}
-				}
-			}
-
-			if *filter.Name == "ipv6-cidr-block-association.ipv6-cidr-block" {
-				for _, value := range filter.Values {
-					for _, filterSubnet := range filteredSubnets {
-						for _, cidrBlock := range filterSubnet.Ipv6CidrBlockAssociationSet {
-							if value == cidrBlock.Ipv6CidrBlock {
-								furtherFilteredSubnet = append(furtherFilteredSubnet, filterSubnet)
-							}
-						}
+	for _, val := range filteredSubnets {
+		for _, filter := range _a0.Filters {
+			if *filter.Name == "cidrBlock" {
+				for _, cidrBlock := range filter.Values {
+					if *val.CidrBlock == *cidrBlock {
+						furtherFilteredSubnet = append(furtherFilteredSubnet, val)
 					}
 				}
 			}
