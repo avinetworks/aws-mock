@@ -882,6 +882,15 @@ func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesIn
 // AssociateAddress provides a mock function with given fields: _a0
 func (_m *EC2API) AssociateAddress(_a0 *ec2.AssociateAddressInput) (output *ec2.AssociateAddressOutput, err error) {
 	output = &ec2.AssociateAddressOutput{}
+	if err := _m.recorder.CheckError("AssociateAddress"); err != nil {
+		return output, err
+	}
+	_m.recorder.Record("AssociateAddress")
+	returns, exist := _m.recorder.giveRecordedOutput("AssociateAddress", _a0)
+	if exist {
+		assertedErr, _ := returns[1].(error)
+		return returns[0].(*ec2.AssociateAddressOutput), assertedErr
+	}
 	networkInterfaceCard, ok := _m.networkinterfaces[*_a0.NetworkInterfaceId]
 	if !ok {
 		return output, errors.New("network interface not found")
@@ -897,6 +906,32 @@ func (_m *EC2API) AssociateAddress(_a0 *ec2.AssociateAddressInput) (output *ec2.
 			associationIdStr := "fip-alloc-" + associationId.String()
 			privateIP.Association.AssociationId = &associationIdStr
 			networkInterfaceCard.PrivateIpAddresses[i] = privateIP
+		}
+	}
+	return
+}
+
+// DescribeAddresses provides a mock function with given fields: _a0
+func (_m *EC2API) DescribeAddresses(_a0 *ec2.DescribeAddressesInput) (output *ec2.DescribeAddressesOutput, err error) {
+	output = &ec2.DescribeAddressesOutput{}
+	output.Addresses = make([]*ec2.Address, 0)
+	if err := _m.recorder.CheckError("DescribeAddresses"); err != nil {
+		return output, err
+	}
+	_m.recorder.Record("DescribeAddresses")
+	returns, exist := _m.recorder.giveRecordedOutput("DescribeAddresses", _a0)
+	if exist {
+		assertedErr, _ := returns[1].(error)
+		return returns[0].(*ec2.DescribeAddressesOutput), assertedErr
+	}
+	for _, inputIP := range _a0.PublicIps {
+		for allocationId, elasticIP := range _m.assignedelasticIps {
+			if elasticIP == *inputIP {
+				output.Addresses = append(output.Addresses, &ec2.Address{
+					AllocationId: &allocationId,
+					PublicIp:     inputIP,
+				})
+			}
 		}
 	}
 	return
