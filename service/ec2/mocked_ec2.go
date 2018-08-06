@@ -602,11 +602,31 @@ func (_m *EC2API) AssignPrivateIpAddresses(_a0 *ec2.AssignPrivateIpAddressesInpu
 		assertedErr, _ := returns[1].(error)
 		return returns[0].(*ec2.AssignPrivateIpAddressesOutput), assertedErr
 	}
-	count := *_a0.SecondaryPrivateIpAddressCount
 	networkInterface, exist := _m.networkinterfaces[*_a0.NetworkInterfaceId]
 	if !exist {
 		err = errors.New("interface id not found")
+		return
 	}
+	primary := false
+	if _a0.SecondaryPrivateIpAddressCount == nil {
+		//handle for attaching ip
+		for _, ip := range _a0.PrivateIpAddresses {
+			if networkInterface.PrivateIpAddresses == nil {
+				networkInterface.PrivateIpAddresses = make([]*ec2.NetworkInterfacePrivateIpAddress, 0)
+			}
+			privateDnsName := "ip-" + strings.Replace(*ip, ".", "-", -1) + ".ap-southeast-1.compute.internal"
+			networkInterface.PrivateIpAddresses = append(networkInterface.PrivateIpAddresses, &ec2.NetworkInterfacePrivateIpAddress{
+				PrivateIpAddress: ip,
+				PrivateDnsName:   &privateDnsName,
+				Primary:          &primary,
+			})
+		}
+
+		_m.networkinterfaces[*_a0.NetworkInterfaceId] = networkInterface
+		return
+	}
+	count := *_a0.SecondaryPrivateIpAddressCount
+
 	subnet := _m.subnets[*networkInterface.SubnetId]
 	cidr := subnet.CidrBlock
 	randomSecondaryIps := []string{}
@@ -633,7 +653,6 @@ func (_m *EC2API) AssignPrivateIpAddresses(_a0 *ec2.AssignPrivateIpAddressesInpu
 			time.Sleep(1 * time.Second)
 		}
 	}
-	primary := false
 	for _, secondaryip := range randomSecondaryIps {
 		privateDnsName := "ip-" + strings.Replace(secondaryip, ".", "-", -1) + ".ap-southeast-1.compute.internal"
 		networkInterface.PrivateIpAddresses = append(networkInterface.PrivateIpAddresses, &ec2.NetworkInterfacePrivateIpAddress{
@@ -820,10 +839,11 @@ func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesIn
 			}
 		}
 	}
-
 	if len(furtherFilteredNetworkInterface) != 0 {
 		filteredNetworkInterfaces = furtherFilteredNetworkInterface
 		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
+	} else {
+		furtherFilteredNetworkInterface = filteredNetworkInterfaces
 	}
 
 	for _, val := range filteredNetworkInterfaces {
@@ -841,6 +861,8 @@ func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesIn
 	if len(furtherFilteredNetworkInterface) != 0 {
 		filteredNetworkInterfaces = furtherFilteredNetworkInterface
 		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
+	} else {
+		furtherFilteredNetworkInterface = filteredNetworkInterfaces
 	}
 
 	for _, val := range filteredNetworkInterfaces {
@@ -857,6 +879,8 @@ func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesIn
 	if len(furtherFilteredNetworkInterface) != 0 {
 		filteredNetworkInterfaces = furtherFilteredNetworkInterface
 		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
+	} else {
+		furtherFilteredNetworkInterface = filteredNetworkInterfaces
 	}
 
 	for _, val := range filteredNetworkInterfaces {
@@ -875,6 +899,10 @@ func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesIn
 			}
 		}
 	}
+	if len(furtherFilteredNetworkInterface) == 0 {
+		furtherFilteredNetworkInterface = filteredNetworkInterfaces
+	}
+
 	output.NetworkInterfaces = furtherFilteredNetworkInterface
 	return
 }
@@ -897,14 +925,16 @@ func (_m *EC2API) AssociateAddress(_a0 *ec2.AssociateAddressInput) (output *ec2.
 	}
 	for i, privateIP := range networkInterfaceCard.PrivateIpAddresses {
 		if *privateIP.PrivateIpAddress == *_a0.PrivateIpAddress {
-			privateIP.Association.AllocationId = _a0.AllocationId
-			privateIP.Association.PublicIp = _a0.PublicIp
+			association := &ec2.NetworkInterfaceAssociation{}
+			association.AllocationId = _a0.AllocationId
+			association.PublicIp = _a0.PublicIp
 			associationId, err := uuid.NewV4()
 			if err != nil {
 				return output, err
 			}
 			associationIdStr := "fip-alloc-" + associationId.String()
-			privateIP.Association.AssociationId = &associationIdStr
+			association.AssociationId = &associationIdStr
+			privateIP.Association = association
 			networkInterfaceCard.PrivateIpAddresses[i] = privateIP
 		}
 	}
@@ -931,6 +961,29 @@ func (_m *EC2API) DescribeAddresses(_a0 *ec2.DescribeAddressesInput) (output *ec
 					AllocationId: &allocationId,
 					PublicIp:     inputIP,
 				})
+			}
+		}
+	}
+	return
+}
+
+// DisassociateAddress provides a mock function with given fields: _a0
+func (_m *EC2API) DisassociateAddress(_a0 *ec2.DisassociateAddressInput) (output *ec2.DisassociateAddressOutput, err error) {
+	output = &ec2.DisassociateAddressOutput{}
+	if err := _m.recorder.CheckError("AssociateAddress"); err != nil {
+		return output, err
+	}
+	_m.recorder.Record("AssociateAddress")
+	returns, exist := _m.recorder.giveRecordedOutput("AssociateAddress", _a0)
+	if exist {
+		assertedErr, _ := returns[1].(error)
+		return returns[0].(*ec2.DisassociateAddressOutput), assertedErr
+	}
+	for networkInterfaceIndex, networkInterfaceCard := range _m.networkinterfaces {
+		for i, privateIP := range networkInterfaceCard.PrivateIpAddresses {
+			if *privateIP.Association.AllocationId == *_a0.AssociationId {
+				networkInterfaceCard.PrivateIpAddresses[i].Association = &ec2.NetworkInterfaceAssociation{}
+				_m.networkinterfaces[networkInterfaceIndex] = networkInterfaceCard
 			}
 		}
 	}
