@@ -18,21 +18,6 @@ import ec2 "github.com/aws/aws-sdk-go/service/ec2"
 
 import request "github.com/aws/aws-sdk-go/aws/request"
 
-// CreateTags provides a mock function with given fields: _a0
-func (_m *EC2API) CreateTags(_a0 *ec2.CreateTagsInput) (output *ec2.CreateTagsOutput, err error) {
-	// if prefix is eni then update network interface tag
-	// for _, resourceId := range _a0.Resources {
-
-	// }
-	return
-}
-
-// programmed mocks ends here
-// AssociateAddress provides a mock function with given fields: _a0
-func (_m *EC2API) AssociateAddress(_a0 *ec2.AssociateAddressInput) (output *ec2.AssociateAddressOutput, err error) {
-
-	return
-}
 
 func (_m *EC2API) ReleaseAddressRequest(*ec2.ReleaseAddressInput) (r *request.Request, output *ec2.ReleaseAddressOutput) {
 	return
@@ -7855,28 +7840,7 @@ func (_m *EC2API) DescribeAccountAttributesWithContext(_a0 aws.Context, _a1 *ec2
 	return r0, r1
 }
 
-// DescribeAddresses provides a mock function with given fields: _a0
-func (_m *EC2API) DescribeAddresses(_a0 *ec2.DescribeAddressesInput) (*ec2.DescribeAddressesOutput, error) {
-	ret := _m.Called(_a0)
 
-	var r0 *ec2.DescribeAddressesOutput
-	if rf, ok := ret.Get(0).(func(*ec2.DescribeAddressesInput) *ec2.DescribeAddressesOutput); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ec2.DescribeAddressesOutput)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*ec2.DescribeAddressesInput) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
 
 // DescribeAddressesRequest provides a mock function with given fields: _a0
 func (_m *EC2API) DescribeAddressesRequest(_a0 *ec2.DescribeAddressesInput) (*request.Request, *ec2.DescribeAddressesOutput) {
@@ -11038,28 +11002,6 @@ func (_m *EC2API) DescribeNetworkInterfacePermissionsWithContext(_a0 aws.Context
 	return r0, r1
 }
 
-// DescribeNetworkInterfaces provides a mock function with given fields: _a0
-func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesInput) (*ec2.DescribeNetworkInterfacesOutput, error) {
-	ret := _m.Called(_a0)
-
-	var r0 *ec2.DescribeNetworkInterfacesOutput
-	if rf, ok := ret.Get(0).(func(*ec2.DescribeNetworkInterfacesInput) *ec2.DescribeNetworkInterfacesOutput); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ec2.DescribeNetworkInterfacesOutput)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*ec2.DescribeNetworkInterfacesInput) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
 
 // DescribeNetworkInterfacesRequest provides a mock function with given fields: _a0
 func (_m *EC2API) DescribeNetworkInterfacesRequest(_a0 *ec2.DescribeNetworkInterfacesInput) (*request.Request, *ec2.DescribeNetworkInterfacesOutput) {
@@ -15155,28 +15097,7 @@ func (_m *EC2API) DisableVpcClassicLinkWithContext(_a0 aws.Context, _a1 *ec2.Dis
 	return r0, r1
 }
 
-// DisassociateAddress provides a mock function with given fields: _a0
-func (_m *EC2API) DisassociateAddress(_a0 *ec2.DisassociateAddressInput) (*ec2.DisassociateAddressOutput, error) {
-	ret := _m.Called(_a0)
 
-	var r0 *ec2.DisassociateAddressOutput
-	if rf, ok := ret.Get(0).(func(*ec2.DisassociateAddressInput) *ec2.DisassociateAddressOutput); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ec2.DisassociateAddressOutput)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*ec2.DisassociateAddressInput) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
 
 // DisassociateAddressRequest provides a mock function with given fields: _a0
 func (_m *EC2API) DisassociateAddressRequest(_a0 *ec2.DisassociateAddressInput) (*request.Request, *ec2.DisassociateAddressOutput) {

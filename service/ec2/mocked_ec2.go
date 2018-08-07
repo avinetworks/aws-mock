@@ -14,6 +14,7 @@ package ec2
 
 import (
 	"strings"
+	"time"
 
 	randomdata "github.com/Pallinder/go-randomdata"
 	ec2 "github.com/aws/aws-sdk-go/service/ec2"
@@ -49,7 +50,7 @@ var AVI_STANDARD_ELASTIC_ALLOCATION_DOMAIN string = "aws"
 var _ ec2iface.EC2API = &EC2API{}
 
 //supported filters
-var supportedsubnetfilter []string = []string{"vpc-id", "availabilityZone", "ipv6-cidr-block-association.association-id", "ipv6-cidr-block-association.state", "ipv6-cidr-block-association.ipv6-cidr-block"}
+var supportedsubnetfilter []string = []string{"vpc-id", "availabilityZone", "cidrBlock"}
 
 func New() *EC2API {
 	// aws allocate default security group to every instances
@@ -204,13 +205,13 @@ func (_m *EC2API) DescribeSubnets(_a0 *ec2.DescribeSubnetsInput) (output *ec2.De
 	for _, val := range _a0.SubnetIds {
 		for _, associatedsubnet := range _m.vpcassocaiatedsubnet {
 			for _, subnet := range associatedsubnet {
-				if val == subnet.SubnetId {
+				if *val == *subnet.SubnetId {
 					filteredSubnets = append(filteredSubnets, subnet)
 				}
 			}
 		}
 	}
-	if len(_a0.Filters) == 0 {
+	if len(_a0.Filters) != 0 {
 		output.Subnets = filteredSubnets
 		return
 	}
@@ -227,63 +228,56 @@ func (_m *EC2API) DescribeSubnets(_a0 *ec2.DescribeSubnetsInput) (output *ec2.De
 	if !doesHaveSupportedFilter {
 		return
 	}
+
+	if len(filteredSubnets) == 0 {
+		for _, associatedsubnet := range _m.vpcassocaiatedsubnet {
+			for _, subnet := range associatedsubnet {
+				filteredSubnets = append(filteredSubnets, subnet)
+			}
+		}
+	}
 	furtherFilteredSubnet := []*ec2.Subnet{}
 
-	if len(filteredSubnets) != 0 {
-		// TODO: @sch00lb0y can be refactored
+	for _, val := range filteredSubnets {
 		for _, filter := range _a0.Filters {
 			if *filter.Name == "vpc-id" {
-				for _, value := range filter.Values {
-					for _, filterSubnet := range filteredSubnets {
-						if filterSubnet.VpcId == value {
-							furtherFilteredSubnet = append(furtherFilteredSubnet, filterSubnet)
-						}
+				for _, vpcid := range filter.Values {
+					if *val.VpcId == *vpcid {
+						furtherFilteredSubnet = append(furtherFilteredSubnet, val)
 					}
 				}
 			}
+		}
+	}
 
+	if len(furtherFilteredSubnet) != 0 {
+		filteredSubnets = furtherFilteredSubnet
+		furtherFilteredSubnet = []*ec2.Subnet{}
+	}
+
+	for _, val := range filteredSubnets {
+		for _, filter := range _a0.Filters {
 			if *filter.Name == "availabilityZone" {
-				for _, value := range filter.Values {
-					for _, filterSubnet := range filteredSubnets {
-						if filterSubnet.AvailabilityZone == value {
-							furtherFilteredSubnet = append(furtherFilteredSubnet, filterSubnet)
-						}
+				for _, availabilityZone := range filter.Values {
+					if *val.AvailabilityZone == *availabilityZone {
+						furtherFilteredSubnet = append(furtherFilteredSubnet, val)
 					}
 				}
 			}
+		}
+	}
 
-			if *filter.Name == "ipv6-cidr-block-association.association-id" {
-				for _, value := range filter.Values {
-					for _, filterSubnet := range filteredSubnets {
-						for _, cidrBlock := range filterSubnet.Ipv6CidrBlockAssociationSet {
-							if value == cidrBlock.AssociationId {
-								furtherFilteredSubnet = append(furtherFilteredSubnet, filterSubnet)
-							}
-						}
-					}
-				}
-			}
+	if len(furtherFilteredSubnet) != 0 {
+		filteredSubnets = furtherFilteredSubnet
+		furtherFilteredSubnet = []*ec2.Subnet{}
+	}
 
-			if *filter.Name == "ipv6-cidr-block-association.state" {
-				for _, value := range filter.Values {
-					for _, filterSubnet := range filteredSubnets {
-						for _, cidrBlock := range filterSubnet.Ipv6CidrBlockAssociationSet {
-							if value == cidrBlock.Ipv6CidrBlockState.State {
-								furtherFilteredSubnet = append(furtherFilteredSubnet, filterSubnet)
-							}
-						}
-					}
-				}
-			}
-
-			if *filter.Name == "ipv6-cidr-block-association.ipv6-cidr-block" {
-				for _, value := range filter.Values {
-					for _, filterSubnet := range filteredSubnets {
-						for _, cidrBlock := range filterSubnet.Ipv6CidrBlockAssociationSet {
-							if value == cidrBlock.Ipv6CidrBlock {
-								furtherFilteredSubnet = append(furtherFilteredSubnet, filterSubnet)
-							}
-						}
+	for _, val := range filteredSubnets {
+		for _, filter := range _a0.Filters {
+			if *filter.Name == "cidrBlock" {
+				for _, cidrBlock := range filter.Values {
+					if *val.CidrBlock == *cidrBlock {
+						furtherFilteredSubnet = append(furtherFilteredSubnet, val)
 					}
 				}
 			}
@@ -352,6 +346,7 @@ func (_m *EC2API) CreateNetworkInterface(_a0 *ec2.CreateNetworkInterfaceInput) (
 			break
 		}
 	}
+	primary := true
 	privateDnsName := "ip-" + strings.Replace(hostForCidr, ".", "-", -1) + ".ap-southeast-1.compute.internal"
 	ntwInterface := &ec2.NetworkInterface{
 		Description:        _a0.Description,
@@ -365,6 +360,7 @@ func (_m *EC2API) CreateNetworkInterface(_a0 *ec2.CreateNetworkInterfaceInput) (
 			&ec2.NetworkInterfacePrivateIpAddress{
 				PrivateIpAddress: &hostForCidr,
 				PrivateDnsName:   &privateDnsName,
+				Primary:          &primary,
 			},
 		},
 	}
@@ -606,11 +602,31 @@ func (_m *EC2API) AssignPrivateIpAddresses(_a0 *ec2.AssignPrivateIpAddressesInpu
 		assertedErr, _ := returns[1].(error)
 		return returns[0].(*ec2.AssignPrivateIpAddressesOutput), assertedErr
 	}
-	count := *_a0.SecondaryPrivateIpAddressCount
 	networkInterface, exist := _m.networkinterfaces[*_a0.NetworkInterfaceId]
 	if !exist {
 		err = errors.New("interface id not found")
+		return
 	}
+	primary := false
+	if _a0.SecondaryPrivateIpAddressCount == nil {
+		//handle for attaching ip
+		for _, ip := range _a0.PrivateIpAddresses {
+			if networkInterface.PrivateIpAddresses == nil {
+				networkInterface.PrivateIpAddresses = make([]*ec2.NetworkInterfacePrivateIpAddress, 0)
+			}
+			privateDnsName := "ip-" + strings.Replace(*ip, ".", "-", -1) + ".ap-southeast-1.compute.internal"
+			networkInterface.PrivateIpAddresses = append(networkInterface.PrivateIpAddresses, &ec2.NetworkInterfacePrivateIpAddress{
+				PrivateIpAddress: ip,
+				PrivateDnsName:   &privateDnsName,
+				Primary:          &primary,
+			})
+		}
+
+		_m.networkinterfaces[*_a0.NetworkInterfaceId] = networkInterface
+		return
+	}
+	count := *_a0.SecondaryPrivateIpAddressCount
+
 	subnet := _m.subnets[*networkInterface.SubnetId]
 	cidr := subnet.CidrBlock
 	randomSecondaryIps := []string{}
@@ -632,8 +648,9 @@ func (_m *EC2API) AssignPrivateIpAddresses(_a0 *ec2.AssignPrivateIpAddressesInpu
 			exist, _ := in_array(hostForCidr, assignedIps)
 			if !exist {
 				randomSecondaryIps = append(randomSecondaryIps, hostForCidr)
-
+				break
 			}
+			time.Sleep(1 * time.Second)
 		}
 	}
 	for _, secondaryip := range randomSecondaryIps {
@@ -641,6 +658,7 @@ func (_m *EC2API) AssignPrivateIpAddresses(_a0 *ec2.AssignPrivateIpAddressesInpu
 		networkInterface.PrivateIpAddresses = append(networkInterface.PrivateIpAddresses, &ec2.NetworkInterfacePrivateIpAddress{
 			PrivateIpAddress: &secondaryip,
 			PrivateDnsName:   &privateDnsName,
+			Primary:          &primary,
 		})
 	}
 	_m.networkinterfaces[*_a0.NetworkInterfaceId] = networkInterface
@@ -728,6 +746,244 @@ func (_m *EC2API) DescribeInstanceAttribute(_a0 *ec2.DescribeInstanceAttributeIn
 		for _, instance := range _m.createdEc2instances {
 			if instance.InstanceId == _a0.InstanceId {
 				output.Groups = instance.SecurityGroups
+			}
+		}
+	}
+	return
+}
+
+func (_m *EC2API) CreateTags(_a0 *ec2.CreateTagsInput) (output *ec2.CreateTagsOutput, err error) {
+	output = &ec2.CreateTagsOutput{}
+	if err := _m.recorder.CheckError("CreateTags"); err != nil {
+		return output, err
+	}
+	_m.recorder.Record("CreateTags")
+	returns, exist := _m.recorder.giveRecordedOutput("CreateTags", _a0)
+	if exist {
+		assertedErr, _ := returns[1].(error)
+		return returns[0].(*ec2.CreateTagsOutput), assertedErr
+	}
+	//if prefix is eni then update network interface tag
+	for _, resourceId := range _a0.Resources {
+		if strings.HasPrefix(*resourceId, "eni") {
+			// update tag for network interface
+			networkInterfaceCard, ok := _m.networkinterfaces[*resourceId]
+			if !ok {
+				return output, errors.New("network interface not found")
+			}
+			networkInterfaceCard.TagSet = _a0.Tags
+			_m.networkinterfaces[*resourceId] = networkInterfaceCard
+		}
+	}
+	return
+}
+
+// DescribeNetworkInterfaces provides a mock function with given fields: _a0
+func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesInput) (output *ec2.DescribeNetworkInterfacesOutput, err error) {
+	output = &ec2.DescribeNetworkInterfacesOutput{}
+	if err := _m.recorder.CheckError("DescribeNetworkInterfaces"); err != nil {
+		return output, err
+	}
+	_m.recorder.Record("DescribeNetworkInterfaces")
+	returns, exist := _m.recorder.giveRecordedOutput("DescribeNetworkInterfaces", _a0)
+	if exist {
+		assertedErr, _ := returns[1].(error)
+		return returns[0].(*ec2.DescribeNetworkInterfacesOutput), assertedErr
+	}
+
+	filteredNetworkInterfaces := []*ec2.NetworkInterface{}
+	for _, id := range _a0.NetworkInterfaceIds {
+		val, ok := _m.networkinterfaces[*id]
+		if ok {
+			filteredNetworkInterfaces = append(filteredNetworkInterfaces, val)
+		}
+	}
+	if len(_a0.Filters) == 0 {
+		output.NetworkInterfaces = filteredNetworkInterfaces
+		return
+	}
+
+	if len(filteredNetworkInterfaces) == 0 {
+		for _, val := range _m.networkinterfaces {
+			filteredNetworkInterfaces = append(filteredNetworkInterfaces, val)
+		}
+	}
+
+	furtherFilteredNetworkInterface := []*ec2.NetworkInterface{}
+
+	for _, val := range filteredNetworkInterfaces {
+		for _, filter := range _a0.Filters {
+			if *filter.Name == "vpc-id" {
+				for _, vpcid := range filter.Values {
+					if *val.VpcId == *vpcid {
+						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+					}
+				}
+			}
+		}
+	}
+
+	if len(furtherFilteredNetworkInterface) != 0 {
+		filteredNetworkInterfaces = furtherFilteredNetworkInterface
+		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
+	}
+
+	for _, val := range filteredNetworkInterfaces {
+		for _, filter := range _a0.Filters {
+			if *filter.Name == "subnet-id" {
+				for _, subnetid := range filter.Values {
+					if *val.SubnetId == *subnetid {
+						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+					}
+				}
+			}
+		}
+	}
+	if len(furtherFilteredNetworkInterface) != 0 {
+		filteredNetworkInterfaces = furtherFilteredNetworkInterface
+		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
+	} else {
+		furtherFilteredNetworkInterface = filteredNetworkInterfaces
+	}
+
+	for _, val := range filteredNetworkInterfaces {
+		for _, filter := range _a0.Filters {
+			if *filter.Name == "availabilityZone" {
+				for _, availabilityZone := range filter.Values {
+					if *val.AvailabilityZone == *availabilityZone {
+						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+					}
+				}
+			}
+		}
+	}
+
+	if len(furtherFilteredNetworkInterface) != 0 {
+		filteredNetworkInterfaces = furtherFilteredNetworkInterface
+		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
+	} else {
+		furtherFilteredNetworkInterface = filteredNetworkInterfaces
+	}
+
+	for _, val := range filteredNetworkInterfaces {
+		for _, filter := range _a0.Filters {
+			if *filter.Name == "availabilityZone" {
+				for _, availabilityZone := range filter.Values {
+					if *val.AvailabilityZone == *availabilityZone {
+						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+					}
+				}
+			}
+		}
+	}
+	if len(furtherFilteredNetworkInterface) != 0 {
+		filteredNetworkInterfaces = furtherFilteredNetworkInterface
+		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
+	} else {
+		furtherFilteredNetworkInterface = filteredNetworkInterfaces
+	}
+
+	for _, val := range filteredNetworkInterfaces {
+		for _, filter := range _a0.Filters {
+			if strings.HasPrefix("tag", *filter.Name) {
+				// get the tag name
+				tagName := strings.Split(*filter.Name, ":")[1]
+				tagValue := *filter.Values[0]
+				for _, tag := range val.TagSet {
+					if *tag.Key == tagName {
+						if *tag.Value == tagValue {
+							furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+						}
+					}
+				}
+			}
+		}
+	}
+	if len(furtherFilteredNetworkInterface) == 0 {
+		furtherFilteredNetworkInterface = filteredNetworkInterfaces
+	}
+
+	output.NetworkInterfaces = furtherFilteredNetworkInterface
+	return
+}
+
+// AssociateAddress provides a mock function with given fields: _a0
+func (_m *EC2API) AssociateAddress(_a0 *ec2.AssociateAddressInput) (output *ec2.AssociateAddressOutput, err error) {
+	output = &ec2.AssociateAddressOutput{}
+	if err := _m.recorder.CheckError("AssociateAddress"); err != nil {
+		return output, err
+	}
+	_m.recorder.Record("AssociateAddress")
+	returns, exist := _m.recorder.giveRecordedOutput("AssociateAddress", _a0)
+	if exist {
+		assertedErr, _ := returns[1].(error)
+		return returns[0].(*ec2.AssociateAddressOutput), assertedErr
+	}
+	networkInterfaceCard, ok := _m.networkinterfaces[*_a0.NetworkInterfaceId]
+	if !ok {
+		return output, errors.New("network interface not found")
+	}
+	for i, privateIP := range networkInterfaceCard.PrivateIpAddresses {
+		if *privateIP.PrivateIpAddress == *_a0.PrivateIpAddress {
+			association := &ec2.NetworkInterfaceAssociation{}
+			association.AllocationId = _a0.AllocationId
+			association.PublicIp = _a0.PublicIp
+			associationId, err := uuid.NewV4()
+			if err != nil {
+				return output, err
+			}
+			associationIdStr := "fip-alloc-" + associationId.String()
+			association.AssociationId = &associationIdStr
+			privateIP.Association = association
+			networkInterfaceCard.PrivateIpAddresses[i] = privateIP
+		}
+	}
+	return
+}
+
+// DescribeAddresses provides a mock function with given fields: _a0
+func (_m *EC2API) DescribeAddresses(_a0 *ec2.DescribeAddressesInput) (output *ec2.DescribeAddressesOutput, err error) {
+	output = &ec2.DescribeAddressesOutput{}
+	output.Addresses = make([]*ec2.Address, 0)
+	if err := _m.recorder.CheckError("DescribeAddresses"); err != nil {
+		return output, err
+	}
+	_m.recorder.Record("DescribeAddresses")
+	returns, exist := _m.recorder.giveRecordedOutput("DescribeAddresses", _a0)
+	if exist {
+		assertedErr, _ := returns[1].(error)
+		return returns[0].(*ec2.DescribeAddressesOutput), assertedErr
+	}
+	for _, inputIP := range _a0.PublicIps {
+		for allocationId, elasticIP := range _m.assignedelasticIps {
+			if elasticIP == *inputIP {
+				output.Addresses = append(output.Addresses, &ec2.Address{
+					AllocationId: &allocationId,
+					PublicIp:     inputIP,
+				})
+			}
+		}
+	}
+	return
+}
+
+// DisassociateAddress provides a mock function with given fields: _a0
+func (_m *EC2API) DisassociateAddress(_a0 *ec2.DisassociateAddressInput) (output *ec2.DisassociateAddressOutput, err error) {
+	output = &ec2.DisassociateAddressOutput{}
+	if err := _m.recorder.CheckError("AssociateAddress"); err != nil {
+		return output, err
+	}
+	_m.recorder.Record("AssociateAddress")
+	returns, exist := _m.recorder.giveRecordedOutput("AssociateAddress", _a0)
+	if exist {
+		assertedErr, _ := returns[1].(error)
+		return returns[0].(*ec2.DisassociateAddressOutput), assertedErr
+	}
+	for networkInterfaceIndex, networkInterfaceCard := range _m.networkinterfaces {
+		for i, privateIP := range networkInterfaceCard.PrivateIpAddresses {
+			if *privateIP.Association.AllocationId == *_a0.AssociationId {
+				networkInterfaceCard.PrivateIpAddresses[i].Association = &ec2.NetworkInterfaceAssociation{}
+				_m.networkinterfaces[networkInterfaceIndex] = networkInterfaceCard
 			}
 		}
 	}

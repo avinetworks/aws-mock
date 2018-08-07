@@ -20,8 +20,10 @@ import (
 	"time"
 )
 
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 func rangeIn(low, hi int) string {
-	rand.Seed(time.Now().Unix())
 	return strconv.Itoa(low + rand.Intn(hi-low))
 }
 
@@ -73,6 +75,7 @@ func inc(ip net.IP) {
 }
 
 func PickRandomHostFromCIDR(cidr string) (host string, err error) {
+
 	hosts, err := Hosts(cidr)
 	if err != nil {
 		return
