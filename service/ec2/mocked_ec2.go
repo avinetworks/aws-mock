@@ -120,7 +120,7 @@ func (_m *EC2API) GetDefaultSecurityGroupID() string {
 	return _m.defaultSecurityGroupID
 }
 
-func (_m *EC2API) initialSeeding() {
+func (_m *EC2API) InitialSeeding() {
 
 	// seeding default vpc
 	_m.AppendVpcs(&ec2.Vpc{
@@ -144,11 +144,15 @@ func (_m *EC2API) initialSeeding() {
 	})
 }
 
+func (_m *EC2API) GetDefaultSubnetID() string {
+	return _m.defaultSubnetId
+}
+
 func (_m *EC2API) GetDefaultServiceEngineName() string {
 	return defaultServiceEngineInstanceName
 }
 
-func (_ *EC2API) GetAvailabiltyZone() string {
+func (_ *EC2API) GetDefaultAvailabiltyZone() string {
 	return defaultAvailabilityZone
 }
 
@@ -156,7 +160,7 @@ func (_m *EC2API) GetDefaultVPCID() string {
 	return defaultVpcID
 }
 
-func (_m *EC2API) GetDefaultCIDRBlock() string {
+func (_m *EC2API) GetDefaultVPCCIDRBlock() string {
 	return defaultCidrBlock
 }
 
