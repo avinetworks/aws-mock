@@ -42,6 +42,7 @@ type EC2API struct {
 	createdEc2instances    []*ec2.Instance
 	defaultInstance        *ec2.Instance
 	defaultSecurityGroupID string
+	defaultSubnetId        string
 	recorder               *Recorder
 }
 
@@ -51,6 +52,13 @@ var _ ec2iface.EC2API = &EC2API{}
 
 //supported filters
 var supportedsubnetfilter []string = []string{"vpc-id", "availabilityZone", "cidrBlock"}
+
+var defaultServiceEngineInstanceName = "service-engine"
+var defaultAvailabilityZone = "us-east-1"
+var defaultVpcID = "avi-seeding-vpc"
+var defaultCidrBlock = "10.0.0.0/16"
+var defaultVpcState = "available"
+var defaultSubnetCidr = "10.0.0.0/24"
 
 func New() *EC2API {
 	// aws allocate default security group to every instances
@@ -110,6 +118,50 @@ func (_m *EC2API) AppendVpcs(vpc *ec2.Vpc) {
 
 func (_m *EC2API) GetDefaultSecurityGroupID() string {
 	return _m.defaultSecurityGroupID
+}
+
+func (_m *EC2API) initialSeeding() {
+
+	// seeding default vpc
+	_m.AppendVpcs(&ec2.Vpc{
+		VpcId:     &defaultVpcID,
+		CidrBlock: &defaultCidrBlock,
+		State:     &defaultVpcState,
+	})
+
+	// default subnet in vpc
+	createSubnetOutput, _ := _m.CreateSubnet(
+		&ec2.CreateSubnetInput{
+			CidrBlock:        &defaultSubnetCidr,
+			VpcId:            &defaultVpcID,
+			AvailabilityZone: &defaultAvailabilityZone,
+		},
+	)
+	_m.defaultSubnetId = *createSubnetOutput.Subnet.SubnetId
+	// service engine
+	_m.AppendInstance(&ec2.Instance{
+		InstanceId: &defaultServiceEngineInstanceName,
+	})
+}
+
+func (_m *EC2API) GetDefaultServiceEngineName() string {
+	return defaultServiceEngineInstanceName
+}
+
+func (_ *EC2API) GetAvailabiltyZone() string {
+	return defaultAvailabilityZone
+}
+
+func (_m *EC2API) GetDefaultVPCID() string {
+	return defaultVpcID
+}
+
+func (_m *EC2API) GetDefaultCIDRBlock() string {
+	return defaultCidrBlock
+}
+
+func (_m *EC2API) GetDefaultSubnetCidr() string {
+	return defaultSubnetCidr
 }
 
 // DescribeVpcs provides a mock function with given fields: _a0
