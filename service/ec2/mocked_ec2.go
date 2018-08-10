@@ -566,6 +566,9 @@ func (_m *EC2API) DescribeSecurityGroups(_a0 *ec2.DescribeSecurityGroupsInput) (
 	for _, groupId := range _a0.GroupIds {
 		sg, ok := _m.assignedsecurityGroups[*groupId]
 		if ok {
+			if len(output.SecurityGroups) == 0 {
+				output.SecurityGroups = make([]*ec2.SecurityGroup, 0)
+			}
 			output.SecurityGroups = append(output.SecurityGroups, sg)
 		}
 	}

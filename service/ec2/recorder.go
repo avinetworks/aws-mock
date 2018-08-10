@@ -142,11 +142,11 @@ func (r *Recorder) GiveErrorNthTime(apiName string, nth int64) {
 
 func (r *Recorder) Record(apiName string) {
 	atomic.AddInt64(&r.totalApiCall, 1)
+	r.Lock()
 	_, ok := r.countByApiName[apiName]
 	if !ok {
 		r.countByApiName[apiName] = 0
 	}
-	r.Lock()
 	r.countByApiName[apiName] = r.countByApiName[apiName] + 1
 	r.Unlock()
 }
