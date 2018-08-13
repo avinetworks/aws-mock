@@ -143,21 +143,21 @@ func (r *Recorder) GiveErrorNthTime(apiName string, nth int64) {
 func (r *Recorder) Record(apiName string) {
 	atomic.AddInt64(&r.totalApiCall, 1)
 	r.Lock()
+	defer r.Unlock()
 	_, ok := r.countByApiName[apiName]
 	if !ok {
 		r.countByApiName[apiName] = 0
 	}
 	r.countByApiName[apiName] = r.countByApiName[apiName] + 1
-	r.Unlock()
 }
 
 func (r *Recorder) GiveErrorByTimeOut(t time.Duration, errorString string) {
 	go func() {
 		time.Sleep(t)
 		r.Lock()
+		defer r.Unlock()
 		r.giveErrorNow = true
 		r.globalErrorString = errorString
-		r.Unlock()
 	}()
 }
 
@@ -170,21 +170,21 @@ func (r *Recorder) GiveErrorForApiByTime(apiName, errorString string, t time.Dur
 	go func() {
 		time.Sleep(t)
 		r.Lock()
+		defer r.Unlock()
 		r.giveErrorByApiName[apiName] = ApiErrorByCount{
 			count:    0,
 			errorStr: errorString,
 		}
-		r.Unlock()
 	}()
 }
 
 func (r *Recorder) GiveErrorByApiNameCount(apiName string, count int64, errorString string) {
 	r.Lock()
+	defer r.Unlock()
 	r.giveErrorByApiName[apiName] = ApiErrorByCount{
 		count:    count,
 		errorStr: errorString,
 	}
-	r.Unlock()
 }
 
 func (r *Recorder) GiveErrorByApiCount(limit int64) {
