@@ -17,6 +17,7 @@ import (
 	"time"
 
 	randomdata "github.com/Pallinder/go-randomdata"
+	awssdk "github.com/aws/aws-sdk-go/aws"
 	ec2 "github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
 
@@ -138,9 +139,22 @@ func (_m *EC2API) InitialSeeding() {
 		},
 	)
 	_m.defaultSubnetId = *createSubnetOutput.Subnet.SubnetId
+	networkInterface, _ := _m.CreateNetworkInterface(&ec2.CreateNetworkInterfaceInput{
+		Description: awssdk.String("se nic"),
+		SubnetId:    awssdk.String(_m.GetDefaultSubnetID()),
+	})
 	// service engine
 	_m.AppendInstance(&ec2.Instance{
 		InstanceId: &defaultServiceEngineInstanceName,
+		VpcId:      &defaultVpcID,
+		NetworkInterfaces: []*ec2.InstanceNetworkInterface{
+			&ec2.InstanceNetworkInterface{
+				VpcId:              &defaultVpcID,
+				NetworkInterfaceId: networkInterface.NetworkInterface.NetworkInterfaceId,
+				MacAddress:         networkInterface.NetworkInterface.MacAddress,
+				PrivateIpAddress:   networkInterface.NetworkInterface.PrivateIpAddress,
+			},
+		},
 	})
 }
 
@@ -148,8 +162,13 @@ func (_m *EC2API) GetDefaultSubnetID() string {
 	return _m.defaultSubnetId
 }
 
-func (_m *EC2API) GetDefaultServiceEngineName() string {
-	return defaultServiceEngineInstanceName
+func (_m *EC2API) GetDefaultServiceEngine() *ec2.Instance {
+	instance, _ := _m.DescribeInstances(&ec2.DescribeInstancesInput{
+		InstanceIds: []*string{
+			&defaultServiceEngineInstanceName,
+		},
+	})
+	return instance.Reservations[0].Instances[0]
 }
 
 func (_ *EC2API) GetDefaultAvailabiltyZone() string {
