@@ -163,12 +163,12 @@ func (_m *EC2API) GetDefaultSubnetID() string {
 }
 
 func (_m *EC2API) GetDefaultServiceEngine() *ec2.Instance {
-	instance, _ := _m.DescribeInstances(&ec2.DescribeInstancesInput{
-		InstanceIds: []*string{
-			&defaultServiceEngineInstanceName,
-		},
-	})
-	return instance.Reservations[0].Instances[0]
+	for _, instance := range _m.createdEc2instances {
+		if *instance.InstanceId == defaultServiceEngineInstanceName {
+			return instance
+		}
+	}
+	panic("no initial seeding")
 }
 
 func (_ *EC2API) GetDefaultAvailabiltyZone() string {
