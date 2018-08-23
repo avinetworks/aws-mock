@@ -14,7 +14,6 @@ package ec2
 
 import (
 	"strings"
-	"time"
 
 	randomdata "github.com/Pallinder/go-randomdata"
 	awssdk "github.com/aws/aws-sdk-go/aws"
@@ -720,18 +719,21 @@ func (_m *EC2API) AssignPrivateIpAddresses(_a0 *ec2.AssignPrivateIpAddressesInpu
 			exist, _ := in_array(hostForCidr, assignedIps)
 			if !exist {
 				randomSecondaryIps = append(randomSecondaryIps, hostForCidr)
+				_m.assignedIpOnSubnet[*subnet.SubnetId] = append(_m.assignedIpOnSubnet[*subnet.SubnetId], hostForCidr)
 				break
 			}
-			time.Sleep(1 * time.Second)
+			//time.Sleep(10 * time.Nanosecond)
 		}
 	}
 	for _, secondaryip := range randomSecondaryIps {
+		copyedIp := secondaryip
 		privateDnsName := "ip-" + strings.Replace(secondaryip, ".", "-", -1) + ".ap-southeast-1.compute.internal"
-		networkInterface.PrivateIpAddresses = append(networkInterface.PrivateIpAddresses, &ec2.NetworkInterfacePrivateIpAddress{
-			PrivateIpAddress: &secondaryip,
+		privateIP := &ec2.NetworkInterfacePrivateIpAddress{
+			PrivateIpAddress: &copyedIp,
 			PrivateDnsName:   &privateDnsName,
 			Primary:          &primary,
-		})
+		}
+		networkInterface.PrivateIpAddresses = append(networkInterface.PrivateIpAddresses, privateIP)
 	}
 	_m.networkinterfaces[*_a0.NetworkInterfaceId] = networkInterface
 	return
@@ -898,6 +900,8 @@ func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesIn
 	if len(furtherFilteredNetworkInterface) != 0 {
 		filteredNetworkInterfaces = furtherFilteredNetworkInterface
 		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
+	} else {
+		furtherFilteredNetworkInterface = filteredNetworkInterfaces
 	}
 
 	for _, val := range filteredNetworkInterfaces {
@@ -942,6 +946,24 @@ func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesIn
 			if *filter.Name == "availabilityZone" {
 				for _, availabilityZone := range filter.Values {
 					if *val.AvailabilityZone == *availabilityZone {
+						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+					}
+				}
+			}
+		}
+	}
+	if len(furtherFilteredNetworkInterface) != 0 {
+		filteredNetworkInterfaces = furtherFilteredNetworkInterface
+		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
+	} else {
+		furtherFilteredNetworkInterface = filteredNetworkInterfaces
+	}
+
+	for _, val := range filteredNetworkInterfaces {
+		for _, filter := range _a0.Filters {
+			if *filter.Name == "mac-address" {
+				for _, macAddress := range filter.Values {
+					if *val.MacAddress == *macAddress {
 						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
 					}
 				}
