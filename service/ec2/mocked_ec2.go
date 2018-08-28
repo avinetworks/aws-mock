@@ -23,6 +23,7 @@ import (
 	"errors"
 	"net"
 
+	"github.com/golang/protobuf/proto"
 	mock "github.com/stretchr/testify/mock"
 
 	"github.com/google/uuid"
@@ -43,6 +44,7 @@ type EC2API struct {
 	defaultInstance        *ec2.Instance
 	defaultSecurityGroupID string
 	defaultSubnetId        string
+	routeTable             map[string]*ec2.RouteTable
 	recorder               *Recorder
 }
 
@@ -100,6 +102,7 @@ func New() *EC2API {
 		defaultInstance:        defaultInstances[0],
 		defaultSecurityGroupID: securityGroupIdStr,
 		recorder:               recorder,
+		routeTable:             make(map[string]*ec2.RouteTable, 0),
 	}
 }
 
@@ -142,6 +145,59 @@ func (_m *EC2API) InitialSeeding() {
 		Description: awssdk.String("se nic"),
 		SubnetId:    awssdk.String(_m.GetDefaultSubnetID()),
 	})
+
+	//populating route table, we'll associate one public route as well for
+	// avi networks internal testing
+	routeTableID := "avi-route-table-" + uuid.New().String()
+	routeTableAssociationID := "avi-route-table-association-" + uuid.New().String()
+	_m.routeTable[routeTableID] = &ec2.RouteTable{
+		VpcId:        &defaultVpcID,
+		RouteTableId: &routeTableID,
+		Associations: []*ec2.RouteTableAssociation{
+			&ec2.RouteTableAssociation{
+				RouteTableAssociationId: &routeTableAssociationID,
+				Main:         proto.Bool(true),
+				RouteTableId: &routeTableID,
+			},
+		},
+		Routes: []*ec2.Route{
+			&ec2.Route{
+				GatewayId:            proto.String("local"),
+				DestinationCidrBlock: &defaultCidrBlock,
+				State:                proto.String("active"),
+				Origin:               proto.String("Create Route Table"),
+			},
+		},
+	}
+
+	routeTableID = "avi-route-table-" + uuid.New().String()
+	routeTableAssociationID = "avi-route-table-association-" + uuid.New().String()
+	_m.routeTable[routeTableID] = &ec2.RouteTable{
+		VpcId:        &defaultVpcID,
+		RouteTableId: &routeTableID,
+		Associations: []*ec2.RouteTableAssociation{
+			&ec2.RouteTableAssociation{
+				RouteTableAssociationId: &routeTableAssociationID,
+				Main:         proto.Bool(false),
+				RouteTableId: &routeTableID,
+				SubnetId:     &_m.defaultSubnetId,
+			},
+		},
+		PropagatingVgws: []*ec2.PropagatingVgw{
+			&ec2.PropagatingVgw{
+				GatewayId: proto.String("avi internet gateway"),
+			},
+		},
+		Routes: []*ec2.Route{
+			&ec2.Route{
+				GatewayId:            proto.String("avi internet gateway"),
+				DestinationCidrBlock: proto.String("0.0.0.0/0"),
+				State:                proto.String("active"),
+				Origin:               proto.String("Create Route Table"),
+			},
+		},
+	}
+
 	// service engine
 	_m.AppendInstance(&ec2.Instance{
 		InstanceId: &defaultServiceEngineInstanceName,
@@ -1079,5 +1135,54 @@ func (_m *EC2API) DisassociateAddress(_a0 *ec2.DisassociateAddressInput) (output
 			}
 		}
 	}
+	return
+}
+
+// DescribeRouteTables provides a mock function with given fields: _a0
+func (_m *EC2API) DescribeRouteTables(_a0 *ec2.DescribeRouteTablesInput) (output *ec2.DescribeRouteTablesOutput, err error) {
+	output = &ec2.DescribeRouteTablesOutput{}
+	if err := _m.recorder.CheckError("DescribeRouteTables"); err != nil {
+		return output, err
+	}
+	_m.recorder.Record("DescribeRouteTables")
+	returns, exist := _m.recorder.giveRecordedOutput("DescribeRouteTables", _a0)
+	if exist {
+		assertedErr, _ := returns[1].(error)
+		return returns[0].(*ec2.DescribeRouteTablesOutput), assertedErr
+	}
+
+	filteredRouteTables := []*ec2.RouteTable{}
+	for _, filterId := range _a0.RouteTableIds {
+		for routeTableID, routeTable := range _m.routeTable {
+			if routeTableID == *filterId {
+				filteredRouteTables = append(filteredRouteTables, routeTable)
+			}
+		}
+	}
+	if len(_a0.Filters) == 0 {
+		output.RouteTables = filteredRouteTables
+		return
+	}
+
+	if len(filteredRouteTables) == 0 {
+		for _, val := range _m.routeTable {
+			filteredRouteTables = append(filteredRouteTables, val)
+		}
+	}
+
+	furtherFilteredRouteTables := []*ec2.RouteTable{}
+
+	for _, val := range filteredRouteTables {
+		for _, filter := range _a0.Filters {
+			if *filter.Name == "vpc-id" {
+				for _, vpcId := range filter.Values {
+					if *val.VpcId == *vpcId {
+						furtherFilteredRouteTables = append(furtherFilteredRouteTables, val)
+					}
+				}
+			}
+		}
+	}
+	output.RouteTables = furtherFilteredRouteTables
 	return
 }
