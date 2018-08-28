@@ -185,12 +185,12 @@ func (_m *EC2API) InitialSeeding() {
 		},
 		PropagatingVgws: []*ec2.PropagatingVgw{
 			&ec2.PropagatingVgw{
-				GatewayId: proto.String("avi internet gateway"),
+				GatewayId: proto.String("igw-avi-internet-gateway"),
 			},
 		},
 		Routes: []*ec2.Route{
 			&ec2.Route{
-				GatewayId:            proto.String("avi internet gateway"),
+				GatewayId:            proto.String("igw-avi-internet-gateway"),
 				DestinationCidrBlock: proto.String("0.0.0.0/0"),
 				State:                proto.String("active"),
 				Origin:               proto.String("Create Route Table"),
@@ -339,23 +339,6 @@ func (_m *EC2API) DescribeSubnets(_a0 *ec2.DescribeSubnetsInput) (output *ec2.De
 			}
 		}
 	}
-	if len(_a0.Filters) != 0 {
-		output.Subnets = filteredSubnets
-		return
-	}
-	var doesHaveSupportedFilter bool
-	for _, filter := range _a0.Filters {
-		exist, _ := in_array(*filter.Name, supportedsubnetfilter)
-		if exist {
-			doesHaveSupportedFilter = true
-			break
-		}
-		doesHaveSupportedFilter = false
-	}
-
-	if !doesHaveSupportedFilter {
-		return
-	}
 
 	if len(filteredSubnets) == 0 {
 		for _, associatedsubnet := range _m.vpcassocaiatedsubnet {
@@ -365,7 +348,6 @@ func (_m *EC2API) DescribeSubnets(_a0 *ec2.DescribeSubnetsInput) (output *ec2.De
 		}
 	}
 	furtherFilteredSubnet := []*ec2.Subnet{}
-
 	for _, val := range filteredSubnets {
 		for _, filter := range _a0.Filters {
 			if *filter.Name == "vpc-id" {
@@ -381,8 +363,9 @@ func (_m *EC2API) DescribeSubnets(_a0 *ec2.DescribeSubnetsInput) (output *ec2.De
 	if len(furtherFilteredSubnet) != 0 {
 		filteredSubnets = furtherFilteredSubnet
 		furtherFilteredSubnet = []*ec2.Subnet{}
+	} else {
+		furtherFilteredSubnet = filteredSubnets
 	}
-
 	for _, val := range filteredSubnets {
 		for _, filter := range _a0.Filters {
 			if *filter.Name == "availabilityZone" {
@@ -398,6 +381,8 @@ func (_m *EC2API) DescribeSubnets(_a0 *ec2.DescribeSubnetsInput) (output *ec2.De
 	if len(furtherFilteredSubnet) != 0 {
 		filteredSubnets = furtherFilteredSubnet
 		furtherFilteredSubnet = []*ec2.Subnet{}
+	} else {
+		furtherFilteredSubnet = filteredSubnets
 	}
 
 	for _, val := range filteredSubnets {
@@ -410,6 +395,9 @@ func (_m *EC2API) DescribeSubnets(_a0 *ec2.DescribeSubnetsInput) (output *ec2.De
 				}
 			}
 		}
+	}
+	if len(furtherFilteredSubnet) == 0 {
+		furtherFilteredSubnet = filteredSubnets
 	}
 
 	output.Subnets = furtherFilteredSubnet
