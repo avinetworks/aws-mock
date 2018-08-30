@@ -28,7 +28,7 @@ func rangeIn(low, hi int) string {
 }
 
 func rangeInInt(low, hi int) int {
-	rand.Seed(time.Now().Unix())
+	//rand.Seed(time.Now().Unix())
 	return low + rand.Intn(hi-low)
 }
 
