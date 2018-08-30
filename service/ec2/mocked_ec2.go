@@ -71,8 +71,10 @@ func New() *EC2API {
 	securityGroupIdStr := "sg-" + securityGroupId.String()
 	securityGroupName := "sg-default"
 	defaultSecurityGroup := &ec2.SecurityGroup{
-		GroupId:   &securityGroupIdStr,
-		GroupName: &securityGroupName,
+		GroupId:     &securityGroupIdStr,
+		GroupName:   &securityGroupName,
+		VpcId:       &defaultVpcID,
+		Description: proto.String("default security group"),
 	}
 	defaultSecurityGroups := map[string]*ec2.SecurityGroup{}
 	defaultSecurityGroups[securityGroupIdStr] = defaultSecurityGroup
@@ -627,9 +629,10 @@ func (_m *EC2API) CreateSecurityGroup(_a0 *ec2.CreateSecurityGroupInput) (output
 	securityGroupIdStr := "sg-" + securityGroupId.String()
 
 	_m.assignedsecurityGroups[securityGroupIdStr] = &ec2.SecurityGroup{
-		GroupId:   &securityGroupIdStr,
-		VpcId:     _a0.VpcId,
-		GroupName: _a0.GroupName,
+		GroupId:     &securityGroupIdStr,
+		VpcId:       _a0.VpcId,
+		GroupName:   _a0.GroupName,
+		Description: _a0.Description,
 	}
 	output.GroupId = &securityGroupIdStr
 	return
@@ -671,15 +674,37 @@ func (_m *EC2API) DescribeSecurityGroups(_a0 *ec2.DescribeSecurityGroupsInput) (
 		return returns[0].(*ec2.DescribeSecurityGroupsOutput), assertedErr
 	}
 
+	filteredSecuirytGroup := []*ec2.SecurityGroup{}
 	for _, groupId := range _a0.GroupIds {
 		sg, ok := _m.assignedsecurityGroups[*groupId]
 		if ok {
-			if len(output.SecurityGroups) == 0 {
-				output.SecurityGroups = make([]*ec2.SecurityGroup, 0)
-			}
-			output.SecurityGroups = append(output.SecurityGroups, sg)
+			filteredSecuirytGroup = append(filteredSecuirytGroup, sg)
 		}
 	}
+	if len(_a0.Filters) == 0 {
+		output.SecurityGroups = filteredSecuirytGroup
+		return
+	}
+
+	if len(filteredSecuirytGroup) == 0 {
+		for _, val := range _m.assignedsecurityGroups {
+			filteredSecuirytGroup = append(filteredSecuirytGroup, val)
+		}
+	}
+	furtherFilteredSecurityGroup := []*ec2.SecurityGroup{}
+	for _, val := range filteredSecuirytGroup {
+		for _, filter := range _a0.Filters {
+			if *filter.Name == "vpc-id" {
+				for _, vpcId := range filter.Values {
+					if *val.VpcId == *vpcId {
+						furtherFilteredSecurityGroup = append(furtherFilteredSecurityGroup, val)
+					}
+				}
+			}
+		}
+	}
+
+	output.SecurityGroups = furtherFilteredSecurityGroup
 	return
 }
 
@@ -1265,5 +1290,27 @@ func (_m *EC2API) DescribeRouteTables(_a0 *ec2.DescribeRouteTablesInput) (output
 		}
 	}
 	output.RouteTables = furtherFilteredRouteTables
+	return
+}
+
+// DescribeAvailabilityZones provides a mock function with given fields: _a0
+func (_m *EC2API) DescribeAvailabilityZones(_a0 *ec2.DescribeAvailabilityZonesInput) (output *ec2.DescribeAvailabilityZonesOutput, err error) {
+	output = &ec2.DescribeAvailabilityZonesOutput{}
+	if err := _m.recorder.CheckError("DescribeAvailabilityZones"); err != nil {
+		return output, err
+	}
+	_m.recorder.Record("DescribeAvailabilityZones")
+	returns, exist := _m.recorder.giveRecordedOutput("DescribeAvailabilityZones", _a0)
+	if exist {
+		assertedErr, _ := returns[1].(error)
+		return returns[0].(*ec2.DescribeAvailabilityZonesOutput), assertedErr
+	}
+	output.AvailabilityZones = []*ec2.AvailabilityZone{
+		&ec2.AvailabilityZone{
+			RegionName: &defaultAvailabilityZone,
+			State:      proto.String("available"),
+			ZoneName:   &defaultAvailabilityZone,
+		},
+	}
 	return
 }

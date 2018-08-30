@@ -7975,28 +7975,6 @@ func (_m *EC2API) DescribeAggregateIdFormatWithContext(_a0 aws.Context, _a1 *ec2
 	return r0, r1
 }
 
-// DescribeAvailabilityZones provides a mock function with given fields: _a0
-func (_m *EC2API) DescribeAvailabilityZones(_a0 *ec2.DescribeAvailabilityZonesInput) (*ec2.DescribeAvailabilityZonesOutput, error) {
-	ret := _m.Called(_a0)
-
-	var r0 *ec2.DescribeAvailabilityZonesOutput
-	if rf, ok := ret.Get(0).(func(*ec2.DescribeAvailabilityZonesInput) *ec2.DescribeAvailabilityZonesOutput); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ec2.DescribeAvailabilityZonesOutput)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*ec2.DescribeAvailabilityZonesInput) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
 
 // DescribeAvailabilityZonesRequest provides a mock function with given fields: _a0
 func (_m *EC2API) DescribeAvailabilityZonesRequest(_a0 *ec2.DescribeAvailabilityZonesInput) (*request.Request, *ec2.DescribeAvailabilityZonesOutput) {
