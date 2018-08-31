@@ -18853,28 +18853,7 @@ func (_m *EC2API) PurchaseScheduledInstancesWithContext(_a0 aws.Context, _a1 *ec
 	return r0, r1
 }
 
-// RebootInstances provides a mock function with given fields: _a0
-func (_m *EC2API) RebootInstances(_a0 *ec2.RebootInstancesInput) (*ec2.RebootInstancesOutput, error) {
-	ret := _m.Called(_a0)
 
-	var r0 *ec2.RebootInstancesOutput
-	if rf, ok := ret.Get(0).(func(*ec2.RebootInstancesInput) *ec2.RebootInstancesOutput); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ec2.RebootInstancesOutput)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*ec2.RebootInstancesInput) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
 
 // RebootInstancesRequest provides a mock function with given fields: _a0
 func (_m *EC2API) RebootInstancesRequest(_a0 *ec2.RebootInstancesInput) (*request.Request, *ec2.RebootInstancesOutput) {
@@ -20659,28 +20638,7 @@ func (_m *EC2API) RunScheduledInstancesWithContext(_a0 aws.Context, _a1 *ec2.Run
 	return r0, r1
 }
 
-// StartInstances provides a mock function with given fields: _a0
-func (_m *EC2API) StartInstances(_a0 *ec2.StartInstancesInput) (*ec2.StartInstancesOutput, error) {
-	ret := _m.Called(_a0)
 
-	var r0 *ec2.StartInstancesOutput
-	if rf, ok := ret.Get(0).(func(*ec2.StartInstancesInput) *ec2.StartInstancesOutput); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ec2.StartInstancesOutput)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*ec2.StartInstancesInput) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
 
 // StartInstancesRequest provides a mock function with given fields: _a0
 func (_m *EC2API) StartInstancesRequest(_a0 *ec2.StartInstancesInput) (*request.Request, *ec2.StartInstancesOutput) {
@@ -20737,28 +20695,7 @@ func (_m *EC2API) StartInstancesWithContext(_a0 aws.Context, _a1 *ec2.StartInsta
 	return r0, r1
 }
 
-// StopInstances provides a mock function with given fields: _a0
-func (_m *EC2API) StopInstances(_a0 *ec2.StopInstancesInput) (*ec2.StopInstancesOutput, error) {
-	ret := _m.Called(_a0)
 
-	var r0 *ec2.StopInstancesOutput
-	if rf, ok := ret.Get(0).(func(*ec2.StopInstancesInput) *ec2.StopInstancesOutput); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ec2.StopInstancesOutput)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*ec2.StopInstancesInput) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
 
 // StopInstancesRequest provides a mock function with given fields: _a0
 func (_m *EC2API) StopInstancesRequest(_a0 *ec2.StopInstancesInput) (*request.Request, *ec2.StopInstancesOutput) {
