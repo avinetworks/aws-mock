@@ -1107,10 +1107,13 @@ func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesIn
 
 	for _, val := range filteredNetworkInterfaces {
 		for _, filter := range _a0.Filters {
-			if *filter.Name == "availabilityZone" {
-				for _, availabilityZone := range filter.Values {
-					if *val.AvailabilityZone == *availabilityZone {
-						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+			if *filter.Name == "addresses.private-ip-address" {
+				for _, privateIP := range filter.Values {
+					for _, ip := range val.PrivateIpAddresses {
+						if *ip.PrivateIpAddress == *privateIP {
+
+							furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+						}
 					}
 				}
 			}
