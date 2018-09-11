@@ -211,7 +211,7 @@ func (_m *EC2API) InitialSeeding() {
 		},
 		Tags: []*ec2.Tag{
 			&ec2.Tag{
-				Key:   proto.String("name"),
+				Key:   proto.String("Name"),
 				Value: &defaultServiceEngineInstanceName,
 			},
 		},
@@ -277,7 +277,7 @@ func (_m *EC2API) CreateInstace(name, subnetId, vpcId string) *ec2.Instance {
 		},
 		Tags: []*ec2.Tag{
 			&ec2.Tag{
-				Key:   proto.String("name"),
+				Key:   proto.String("Name"),
 				Value: &instanceid,
 			},
 		},
@@ -356,6 +356,12 @@ func (_m *EC2API) CreateSubnet(_a0 *ec2.CreateSubnetInput) (output *ec2.CreateSu
 		VpcId:                       _a0.VpcId,
 		SubnetId:                    &subnetId,
 		Ipv6CidrBlockAssociationSet: ipv6block,
+		Tags: []*ec2.Tag{
+			&ec2.Tag{
+				Key:   proto.String("Name"),
+				Value: proto.String(subnetId),
+			},
+		},
 	}
 
 	_m.vpcassocaiatedsubnet[*_a0.VpcId] = append(_m.vpcassocaiatedsubnet[*_a0.VpcId], subnet)
@@ -1107,10 +1113,13 @@ func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesIn
 
 	for _, val := range filteredNetworkInterfaces {
 		for _, filter := range _a0.Filters {
-			if *filter.Name == "availabilityZone" {
-				for _, availabilityZone := range filter.Values {
-					if *val.AvailabilityZone == *availabilityZone {
-						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+			if *filter.Name == "addresses.private-ip-address" {
+				for _, privateIP := range filter.Values {
+					for _, ip := range val.PrivateIpAddresses {
+						if *ip.PrivateIpAddress == *privateIP {
+
+							furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+						}
 					}
 				}
 			}
