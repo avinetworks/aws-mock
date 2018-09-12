@@ -36,18 +36,19 @@ type expectedArgs struct {
 	Return []interface{}
 }
 type Recorder struct {
-	totalApiCall        int64
-	countByApiName      map[string]int64 //key will be api name
-	giveForTimeOutError bool
-	giveErrorByApiName  map[string]ApiErrorByCount // key will be api name
-	giveErrorNow        bool
-	globalErrorString   string
-	flagApiCountSet     bool
-	flaggedApiCount     int64
-	methodArgs          map[string]methodArgs
-	expectedInput       map[string]expectedArgs
-	NthErrorCheck       map[string]int64
-	delay               time.Duration
+	totalApiCall                          int64
+	countByApiName                        map[string]int64 //key will be api name
+	giveForTimeOutError                   bool
+	giveErrorByApiName                    map[string]ApiErrorByCount // key will be api name
+	giveErrorNow                          bool
+	globalErrorString                     string
+	flagApiCountSet                       bool
+	flaggedApiCount                       int64
+	methodArgs                            map[string]methodArgs
+	expectedInput                         map[string]expectedArgs
+	NthErrorCheck                         map[string]int64
+	assignPrivateIpFailNetworkInterfaceId string
+	delay                                 time.Duration
 	sync.Mutex
 }
 
@@ -66,6 +67,7 @@ func (r *Recorder) init() {
 	r.globalErrorString = "dummy error, please fill with your's :)"
 	r.delay = time.Second * 0
 	r.NthErrorCheck = make(map[string]int64)
+	r.assignPrivateIpFailNetworkInterfaceId = ""
 	for i := 0; i < totalMethods; i++ {
 		r.methodArgs[ec2Type.Method(i).Name] = methodArgs{
 			Input:  ec2Type.Method(i).Type.NumIn() - 1,
@@ -85,6 +87,13 @@ func (r *Recorder) SetError(errorStr string) {
 	r.globalErrorString = errorStr
 }
 
+func (r *Recorder) SetAssignIpFail(nicID string) {
+	r.assignPrivateIpFailNetworkInterfaceId = nicID
+}
+
+func (r *Recorder) GetAssignIpFailNetworkInterfaceId() string {
+	return r.assignPrivateIpFailNetworkInterfaceId
+}
 func (re *ReturnExpecter) Return(args ...interface{}) {
 	if re.ReturnCount != len(args) {
 		panic(fmt.Sprintf("expected output arg %d and got %d", re.ReturnCount, len(args)))

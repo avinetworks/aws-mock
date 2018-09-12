@@ -796,6 +796,9 @@ func (_m *EC2API) AssignPrivateIpAddresses(_a0 *ec2.AssignPrivateIpAddressesInpu
 		assertedErr, _ := returns[1].(error)
 		return returns[0].(*ec2.AssignPrivateIpAddressesOutput), assertedErr
 	}
+	if _m.recorder.GetAssignIpFailNetworkInterfaceId() == *_a0.NetworkInterfaceId {
+		err = errors.New("avi assign Ip failure")
+	}
 	networkInterface, exist := _m.networkinterfaces[*_a0.NetworkInterfaceId]
 	if !exist {
 		err = errors.New("interface id not found")
