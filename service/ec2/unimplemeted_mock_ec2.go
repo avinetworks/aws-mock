@@ -1129,29 +1129,6 @@ func (_m *EC2API) AttachInternetGatewayWithContext(_a0 aws.Context, _a1 *ec2.Att
 	return r0, r1
 }
 
-// AttachNetworkInterface provides a mock function with given fields: _a0
-func (_m *EC2API) AttachNetworkInterface(_a0 *ec2.AttachNetworkInterfaceInput) (*ec2.AttachNetworkInterfaceOutput, error) {
-	ret := _m.Called(_a0)
-
-	var r0 *ec2.AttachNetworkInterfaceOutput
-	if rf, ok := ret.Get(0).(func(*ec2.AttachNetworkInterfaceInput) *ec2.AttachNetworkInterfaceOutput); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ec2.AttachNetworkInterfaceOutput)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*ec2.AttachNetworkInterfaceInput) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
 // AttachNetworkInterfaceRequest provides a mock function with given fields: _a0
 func (_m *EC2API) AttachNetworkInterfaceRequest(_a0 *ec2.AttachNetworkInterfaceInput) (*request.Request, *ec2.AttachNetworkInterfaceOutput) {
 	ret := _m.Called(_a0)
@@ -17364,29 +17341,6 @@ func (_m *EC2API) ModifyLaunchTemplateWithContext(_a0 aws.Context, _a1 *ec2.Modi
 	var r1 error
 	if rf, ok := ret.Get(1).(func(aws.Context, *ec2.ModifyLaunchTemplateInput, ...request.Option) error); ok {
 		r1 = rf(_a0, _a1, _a2...)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ModifyNetworkInterfaceAttribute provides a mock function with given fields: _a0
-func (_m *EC2API) ModifyNetworkInterfaceAttribute(_a0 *ec2.ModifyNetworkInterfaceAttributeInput) (*ec2.ModifyNetworkInterfaceAttributeOutput, error) {
-	ret := _m.Called(_a0)
-
-	var r0 *ec2.ModifyNetworkInterfaceAttributeOutput
-	if rf, ok := ret.Get(0).(func(*ec2.ModifyNetworkInterfaceAttributeInput) *ec2.ModifyNetworkInterfaceAttributeOutput); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ec2.ModifyNetworkInterfaceAttributeOutput)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*ec2.ModifyNetworkInterfaceAttributeInput) error); ok {
-		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
 	}

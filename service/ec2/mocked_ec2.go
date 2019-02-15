@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	randomdata "github.com/Pallinder/go-randomdata"
+	aws "github.com/aws/aws-sdk-go/aws"
 	awssdk "github.com/aws/aws-sdk-go/aws"
 	ec2 "github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/ec2/ec2iface"
@@ -270,6 +271,7 @@ func (_m *EC2API) CreateInstace(name, subnetId, vpcId string) *ec2.Instance {
 				MacAddress:         networkInterface.NetworkInterface.MacAddress,
 				PrivateIpAddress:   networkInterface.NetworkInterface.PrivateIpAddress,
 				SubnetId:           networkInterface.NetworkInterface.SubnetId,
+				Attachment:         &ec2.InstanceNetworkInterfaceAttachment{DeviceIndex: aws.Int64(0), DeleteOnTermination: aws.Bool(true), AttachmentId: aws.String(GiveRandomId("eni-attach-"))},
 			},
 		},
 		Placement: &ec2.Placement{
@@ -290,6 +292,17 @@ func (_m *EC2API) CreateInstace(name, subnetId, vpcId string) *ec2.Instance {
 	}
 	_m.AppendInstance(instance)
 	return instance
+}
+
+func (_m *EC2API) AttachNetworkInterface(req *ec2.AttachNetworkInterfaceInput) (*ec2.AttachNetworkInterfaceOutput, error) {
+	output := new(ec2.AttachNetworkInterfaceOutput)
+	output.AttachmentId = aws.String(GiveRandomId("eni-attach-"))
+	return output, nil
+}
+
+func (m *EC2API) ModifyNetworkInterfaceAttribute(req *ec2.ModifyNetworkInterfaceAttributeInput) (*ec2.ModifyNetworkInterfaceAttributeOutput, error) {
+	output := new(ec2.ModifyNetworkInterfaceAttributeOutput)
+	return output, nil
 }
 
 // DescribeVpcs provides a mock function with given fields: _a0
