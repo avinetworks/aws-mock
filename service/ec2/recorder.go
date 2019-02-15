@@ -38,10 +38,12 @@ type expectedArgs struct {
 type Recorder struct {
 	totalApiCall                          int64
 	countByApiName                        map[string]int64 //key will be api name
+    activeByApiName                       map[string]bool
 	giveForTimeOutError                   bool
 	giveErrorByApiName                    map[string]ApiErrorByCount // key will be api name
 	giveErrorNow                          bool
 	globalErrorString                     string
+	apiErrorString                        map[string]string
 	flagApiCountSet                       bool
 	flaggedApiCount                       int64
 	methodArgs                            map[string]methodArgs
@@ -49,6 +51,7 @@ type Recorder struct {
 	NthErrorCheck                         map[string]int64
 	assignPrivateIpFailNetworkInterfaceId string
 	delay                                 time.Duration
+	delayByApiName                        map[string]time.Duration
 	sync.Mutex
 }
 
@@ -59,6 +62,9 @@ func (r *Recorder) init() {
 	r.methodArgs = make(map[string]methodArgs, 0)
 	r.expectedInput = make(map[string]expectedArgs, 0)
 	r.countByApiName = make(map[string]int64, 0)
+	r.delayByApiName = make(map[string]time.Duration, 0)
+	r.activeByApiName = make(map[string]bool, 0)
+	r.apiErrorString = make(map[string]string, 0)
 	r.giveErrorByApiName = make(map[string]ApiErrorByCount, 0)
 	r.giveErrorNow = false
 	r.flagApiCountSet = false
@@ -73,6 +79,10 @@ func (r *Recorder) init() {
 			Input:  ec2Type.Method(i).Type.NumIn() - 1,
 			Return: ec2Type.Method(i).Type.NumOut(),
 		}
+        r.countByApiName[ec2Type.Method(i).Name] = 0
+        r.delayByApiName[ec2Type.Method(i).Name] = time.Second * 0
+        r.activeByApiName[ec2Type.Method(i).Name] = true
+        r.apiErrorString[ec2Type.Method(i).Name] = "mocked error"
 	}
 }
 
@@ -81,6 +91,16 @@ type ReturnExpecter struct {
 	ReturnCount int
 	Input       []interface{}
 	methodName  string
+}
+
+func (r *Recorder) SetApiActive(apiName string) {
+    r.activeByApiName[apiName] = true
+    r.apiErrorString[apiName] = "mocked error"
+}
+
+func (r *Recorder) SetApiInactive(apiName string, errorStr string) {
+    r.activeByApiName[apiName] = false
+    r.apiErrorString[apiName] = errorStr
 }
 
 func (r *Recorder) SetError(errorStr string) {
@@ -170,6 +190,16 @@ func (r *Recorder) GiveErrorByTimeOut(t time.Duration, errorString string) {
 	}()
 }
 
+func (r *Recorder) GiveErrorByApiNameByTimeOut(apiName string, t time.Duration, errorString string) {
+	go func() {
+		time.Sleep(t)
+		r.Lock()
+		defer r.Unlock()
+		r.activeByApiName[apiName] = false
+		r.apiErrorString[apiName] = errorString
+	}()
+}
+
 func (r *Recorder) GiveErrorNow(errorStr string) {
 	r.giveErrorNow = true
 	r.globalErrorString = errorStr
@@ -205,11 +235,20 @@ func (r *Recorder) SetDelay(duration time.Duration) {
 	r.delay = duration
 }
 
+func (r *Recorder) SetDelayByApiName(apiName string, duration time.Duration) {
+    r.delayByApiName[apiName] = duration
+}
+
 func (r *Recorder) CheckError(apiName string) error {
-	time.Sleep(r.delay)
+    time.Sleep(r.delay)
+    time.Sleep(r.delayByApiName[apiName])
 	if r.giveErrorNow == true {
 		return errors.New(r.globalErrorString)
 	}
+
+    if r.activeByApiName[apiName] == false {
+        return errors.New(r.apiErrorString[apiName])
+    }
 
 	if r.flagApiCountSet {
 		if r.totalApiCall >= r.flaggedApiCount {

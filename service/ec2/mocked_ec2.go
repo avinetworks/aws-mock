@@ -152,8 +152,8 @@ func (_m *EC2API) InitialSeeding() {
 		Associations: []*ec2.RouteTableAssociation{
 			&ec2.RouteTableAssociation{
 				RouteTableAssociationId: &routeTableAssociationID,
-				Main:         proto.Bool(true),
-				RouteTableId: &routeTableID,
+				Main:                    proto.Bool(true),
+				RouteTableId:            &routeTableID,
 			},
 		},
 		Routes: []*ec2.Route{
@@ -174,9 +174,9 @@ func (_m *EC2API) InitialSeeding() {
 		Associations: []*ec2.RouteTableAssociation{
 			&ec2.RouteTableAssociation{
 				RouteTableAssociationId: &routeTableAssociationID,
-				Main:         proto.Bool(false),
-				RouteTableId: &routeTableID,
-				SubnetId:     &_m.defaultSubnetId,
+				Main:                    proto.Bool(false),
+				RouteTableId:            &routeTableID,
+				SubnetId:                &_m.defaultSubnetId,
 			},
 		},
 		PropagatingVgws: []*ec2.PropagatingVgw{
@@ -486,9 +486,18 @@ func (_m *EC2API) CreateNetworkInterface(_a0 *ec2.CreateNetworkInterfaceInput) (
 		assertedErr, _ := returns[1].(error)
 		return returns[0].(*ec2.CreateNetworkInterfaceOutput), assertedErr
 	}
+	var zero_val int64
+	zero_val = 0
+	if _a0.SecondaryPrivateIpAddressCount == nil {
+		_a0.SecondaryPrivateIpAddressCount = &zero_val
+	}
 	subnet := _m.subnets[*_a0.SubnetId]
 	cidr := subnet.CidrBlock
 	var hostForCidr string
+	var secPrivateDnsNames []string
+	var secPrivateDnsName string
+	var secIps []string
+	var secIp string
 	// TODO: @sch00lb0y retry block is repeated many time, can be moved to a function
 	// retry until you find the unassigned ip
 	for {
@@ -506,6 +515,28 @@ func (_m *EC2API) CreateNetworkInterface(_a0 *ec2.CreateNetworkInterfaceInput) (
 		exist, _ := in_array(hostForCidr, assignedIps)
 		if !exist {
 			break
+		}
+	}
+	for i := int64(0); i < *(_a0.SecondaryPrivateIpAddressCount); i++ {
+		for {
+
+			secIp, err = PickRandomHostFromCIDR(*cidr)
+			if err != nil {
+				return
+			}
+			assignedIps, ok := _m.assignedIpOnSubnet[*_a0.SubnetId]
+			if !ok {
+				_m.assignedIpOnSubnet[*_a0.SubnetId] = append(_m.assignedIpOnSubnet[*_a0.SubnetId], secIp)
+				break
+			}
+			// check the random ip is alredy assiggned or not, if assingned, redo the step
+			exist, _ := in_array(secIp, assignedIps)
+			if !exist {
+				secIps = append(secIps, secIp)
+				secPrivateDnsName = "ip-" + strings.Replace(secIp, ".", "-", -1) + ".ap-southeast-1.compute.internal"
+				secPrivateDnsNames = append(secPrivateDnsNames, secPrivateDnsName)
+				break
+			}
 		}
 	}
 	var ntwInterfaceId string
@@ -532,7 +563,23 @@ func (_m *EC2API) CreateNetworkInterface(_a0 *ec2.CreateNetworkInterfaceInput) (
 		}
 	}
 	primary := true
+	secondary := false
 	privateDnsName := "ip-" + strings.Replace(hostForCidr, ".", "-", -1) + ".ap-southeast-1.compute.internal"
+	privateIpAdds := []*ec2.NetworkInterfacePrivateIpAddress{}
+	privateIpAdds = append(privateIpAdds, &ec2.NetworkInterfacePrivateIpAddress{
+		PrivateIpAddress: &hostForCidr,
+		PrivateDnsName:   &privateDnsName,
+		Primary:          &primary,
+	},
+	)
+	for i := int64(0); i < *(_a0.SecondaryPrivateIpAddressCount); i++ {
+		privateIpAdds = append(privateIpAdds, &ec2.NetworkInterfacePrivateIpAddress{
+			PrivateIpAddress: &secIps[i],
+			PrivateDnsName:   &secPrivateDnsNames[i],
+			Primary:          &secondary,
+		},
+		)
+	}
 	ntwInterface := &ec2.NetworkInterface{
 		Description:        _a0.Description,
 		SubnetId:           _a0.SubnetId,
@@ -541,13 +588,7 @@ func (_m *EC2API) CreateNetworkInterface(_a0 *ec2.CreateNetworkInterfaceInput) (
 		MacAddress:         &randomMac,
 		PrivateIpAddress:   &hostForCidr,
 		PrivateDnsName:     &privateDnsName,
-		PrivateIpAddresses: []*ec2.NetworkInterfacePrivateIpAddress{
-			&ec2.NetworkInterfacePrivateIpAddress{
-				PrivateIpAddress: &hostForCidr,
-				PrivateDnsName:   &privateDnsName,
-				Primary:          &primary,
-			},
-		},
+		PrivateIpAddresses: privateIpAdds,
 	}
 	_m.networkinterfaces[ntwInterfaceId] = ntwInterface
 	output.NetworkInterface = ntwInterface
@@ -1069,124 +1110,92 @@ func (_m *EC2API) DescribeNetworkInterfaces(_a0 *ec2.DescribeNetworkInterfacesIn
 		}
 	}
 
-	furtherFilteredNetworkInterface := []*ec2.NetworkInterface{}
+	set := make(map[*ec2.NetworkInterface]bool)
 
 	for _, val := range filteredNetworkInterfaces {
 		for _, filter := range _a0.Filters {
 			if *filter.Name == "vpc-id" {
 				for _, vpcid := range filter.Values {
 					if *val.VpcId == *vpcid {
-						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+						if filtered, exists := set[val]; (exists && filtered != false) || !exists {
+							set[val] = true
+						}
+					} else {
+						set[val] = false
 					}
 				}
-			}
-		}
-	}
-
-	if len(furtherFilteredNetworkInterface) != 0 {
-		filteredNetworkInterfaces = furtherFilteredNetworkInterface
-		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
-	} else {
-		furtherFilteredNetworkInterface = filteredNetworkInterfaces
-	}
-
-	for _, val := range filteredNetworkInterfaces {
-		for _, filter := range _a0.Filters {
-			if *filter.Name == "subnet-id" {
+			} else if *filter.Name == "subnet-id" {
 				for _, subnetid := range filter.Values {
 					if *val.SubnetId == *subnetid {
-						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+						if filtered, exists := set[val]; (exists && filtered != false) || !exists {
+							set[val] = true
+						}
+					} else {
+						set[val] = false
 					}
 				}
-			}
-		}
-	}
-	if len(furtherFilteredNetworkInterface) != 0 {
-		filteredNetworkInterfaces = furtherFilteredNetworkInterface
-		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
-	} else {
-		furtherFilteredNetworkInterface = filteredNetworkInterfaces
-	}
-
-	for _, val := range filteredNetworkInterfaces {
-		for _, filter := range _a0.Filters {
-			if *filter.Name == "availabilityZone" {
+			} else if *filter.Name == "availabilityZone" {
 				for _, availabilityZone := range filter.Values {
 					if *val.AvailabilityZone == *availabilityZone {
-						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+						if filtered, exists := set[val]; (exists && filtered != false) || !exists {
+							set[val] = true
+						}
+					} else {
+						set[val] = false
 					}
 				}
-			}
-		}
-	}
-
-	if len(furtherFilteredNetworkInterface) != 0 {
-		filteredNetworkInterfaces = furtherFilteredNetworkInterface
-		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
-	} else {
-		furtherFilteredNetworkInterface = filteredNetworkInterfaces
-	}
-
-	for _, val := range filteredNetworkInterfaces {
-		for _, filter := range _a0.Filters {
-			if *filter.Name == "addresses.private-ip-address" {
+			} else if *filter.Name == "addresses.private-ip-address" {
 				for _, privateIP := range filter.Values {
+					onceFlag := false
 					for _, ip := range val.PrivateIpAddresses {
 						if *ip.PrivateIpAddress == *privateIP {
-
-							furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+							if filtered, exists := set[val]; (exists && filtered != false) || !exists {
+								set[val] = true
+								onceFlag = true
+							}
 						}
 					}
-				}
-			}
-		}
-	}
-	if len(furtherFilteredNetworkInterface) != 0 {
-		filteredNetworkInterfaces = furtherFilteredNetworkInterface
-		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
-	} else {
-		furtherFilteredNetworkInterface = filteredNetworkInterfaces
-	}
-
-	for _, val := range filteredNetworkInterfaces {
-		for _, filter := range _a0.Filters {
-			if *filter.Name == "mac-address" {
-				for _, macAddress := range filter.Values {
-					if *val.MacAddress == *macAddress {
-						furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+					if onceFlag == false {
+						set[val] = false
 					}
 				}
-			}
-		}
-	}
-	if len(furtherFilteredNetworkInterface) != 0 {
-		filteredNetworkInterfaces = furtherFilteredNetworkInterface
-		furtherFilteredNetworkInterface = []*ec2.NetworkInterface{}
-	} else {
-		furtherFilteredNetworkInterface = filteredNetworkInterfaces
-	}
-
-	for _, val := range filteredNetworkInterfaces {
-		for _, filter := range _a0.Filters {
-			if strings.HasPrefix("tag", *filter.Name) {
+			} else if *filter.Name == "mac-address" {
+				for _, macAddress := range filter.Values {
+					if *val.MacAddress == *macAddress {
+						if filtered, exists := set[val]; (exists && filtered != false) || !exists {
+							set[val] = true
+						}
+					} else {
+						set[val] = false
+					}
+				}
+			} else if strings.HasPrefix("tag", *filter.Name) {
 				// get the tag name
 				tagName := strings.Split(*filter.Name, ":")[1]
 				tagValue := *filter.Values[0]
 				for _, tag := range val.TagSet {
 					if *tag.Key == tagName {
 						if *tag.Value == tagValue {
-							furtherFilteredNetworkInterface = append(furtherFilteredNetworkInterface, val)
+							if filtered, exists := set[val]; (exists && filtered != false) || !exists {
+								set[val] = true
+							}
+						} else {
+							set[val] = false
 						}
 					}
 				}
 			}
 		}
 	}
-	if len(furtherFilteredNetworkInterface) == 0 {
-		furtherFilteredNetworkInterface = filteredNetworkInterfaces
+	if _a0.Filters != nil {
+		filteredNetworkInterfaces = []*ec2.NetworkInterface{}
+		for k, v := range set {
+			if v == true {
+				filteredNetworkInterfaces = append(filteredNetworkInterfaces, k)
+			}
+		}
 	}
-
-	output.NetworkInterfaces = furtherFilteredNetworkInterface
+	output.NetworkInterfaces = filteredNetworkInterfaces
 	return
 }
 
