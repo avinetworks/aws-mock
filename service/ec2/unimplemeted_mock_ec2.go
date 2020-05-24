@@ -34903,25 +34903,3 @@ func (_m *EC2API) CreateLocalGatewayRouteWithContext(_a0 context.Context, _a1 *e
 
 	return r0, r1
 }
-
-func (_m *EC2API) ModifyNetworkInterfaceAttribute(_a0 *ec2.ModifyNetworkInterfaceAttributeInput) (*ec2.ModifyNetworkInterfaceAttributeOutput, error) {
-	ret := _m.Called(_a0)
-
-	var r0 *ec2.ModifyNetworkInterfaceAttributeOutput
-	if rf, ok := ret.Get(0).(func(*ec2.ModifyNetworkInterfaceAttributeInput) *ec2.ModifyNetworkInterfaceAttributeOutput); ok {
-		r0 = rf(_a0)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*ec2.ModifyNetworkInterfaceAttributeOutput)
-		}
-	}
-
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*ec2.ModifyNetworkInterfaceAttributeInput) error); ok {
-		r1 = rf(_a0)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
