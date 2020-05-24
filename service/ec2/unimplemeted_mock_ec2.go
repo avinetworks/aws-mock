@@ -34874,3 +34874,54 @@ func (_m *EC2API) WithdrawByoipCidrWithContext(_a0 context.Context, _a1 *ec2.Wit
 
 	return r0, r1
 }
+
+func (_m *EC2API) CreateLocalGatewayRouteWithContext(_a0 context.Context, _a1 *ec2.CreateLocalGatewayRouteInput, _a2 ...request.Option) (*ec2.CreateLocalGatewayRouteOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *ec2.CreateLocalGatewayRouteOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *ec2.CreateLocalGatewayRouteInput, ...request.Option) *ec2.CreateLocalGatewayRouteOutput); ok {
+		r0 = rf(_a0, _a1, _a2...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.CreateLocalGatewayRouteOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *ec2.CreateLocalGatewayRouteInput, ...request.Option) error); ok {
+		r1 = rf(_a0, _a1, _a2...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) ModifyNetworkInterfaceAttribute(_a0 *ec2.ModifyNetworkInterfaceAttributeInput) (*ec2.ModifyNetworkInterfaceAttributeOutput, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *ec2.ModifyNetworkInterfaceAttributeOutput
+	if rf, ok := ret.Get(0).(func(*ec2.ModifyNetworkInterfaceAttributeInput) *ec2.ModifyNetworkInterfaceAttributeOutput); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.ModifyNetworkInterfaceAttributeOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*ec2.ModifyNetworkInterfaceAttributeInput) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
