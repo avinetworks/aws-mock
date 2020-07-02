@@ -14,6 +14,7 @@ package ec2
 
 import (
 	"strings"
+	"sync"
 
 	randomdata "github.com/Pallinder/go-randomdata"
 	aws "github.com/aws/aws-sdk-go/aws"
@@ -42,7 +43,7 @@ type EC2API struct {
 	assignedIpOnSubnet       map[string][]string              // key subnet id
 	subnets                  map[string]*ec2.Subnet           // key subnet id
 	assignedMacAddress       []string                         //assigned mac address
-	assignedelasticIps       map[string]string                // key is allocation id
+	assignedelasticIps       *sync.Map                        // key is allocation id
 	assignedsecurityGroups   map[string]*ec2.SecurityGroup    // key is security group id
 	createdEc2instances      []*ec2.Instance
 	defaultSecurityGroupID   string
@@ -89,7 +90,7 @@ func New() *EC2API {
 		assignedIpOnSubnet:       make(map[string][]string, 0),
 		subnets:                  make(map[string]*ec2.Subnet, 0),
 		assignedMacAddress:       make([]string, 0),
-		assignedelasticIps:       make(map[string]string, 0),
+		assignedelasticIps:       &sync.Map{},
 		assignedsecurityGroups:   defaultSecurityGroups,
 		createdEc2instances:      make([]*ec2.Instance, 0),
 		defaultSecurityGroupID:   securityGroupIdStr,
@@ -633,9 +634,11 @@ func (_m *EC2API) AllocateAddress(_a0 *ec2.AllocateAddressInput) (output *ec2.Al
 
 	// no need to retry since uuid is unique
 	var allocatedElasticIps []string
-	for _, allocatedIp := range _m.assignedelasticIps {
-		allocatedElasticIps = append(allocatedElasticIps, allocatedIp)
-	}
+	_m.assignedelasticIps.Range(func(key, val interface{}) bool {
+		allocatedIP, _ := val.(string)
+		allocatedElasticIps = append(allocatedElasticIps, allocatedIP)
+		return true
+	})
 	var randomElasticIp string
 	// retry to find a unassinged ip
 	for {
@@ -645,7 +648,7 @@ func (_m *EC2API) AllocateAddress(_a0 *ec2.AllocateAddressInput) (output *ec2.Al
 			break
 		}
 	}
-	_m.assignedelasticIps[allocationIdStr] = randomElasticIp
+	_m.assignedelasticIps.Store(allocationIdStr, randomElasticIp)
 	output.PublicIp = &randomElasticIp
 	// default vpc is used, cuz in avi only vpc is used
 	// TODO: add support for standard, if needed in future
@@ -666,12 +669,12 @@ func (_m *EC2API) ReleaseAddress(_a0 *ec2.ReleaseAddressInput) (output *ec2.Rele
 		assertedErr, _ := returns[1].(error)
 		return returns[0].(*ec2.ReleaseAddressOutput), assertedErr
 	}
-	_, ok := _m.assignedelasticIps[*_a0.AllocationId]
+	_, ok := _m.assignedelasticIps.Load(*_a0.AllocationId)
 	if !ok {
-		err = errors.New("allocation id not exist")
+		err = errors.New("allocation id does not exist")
 		return
 	}
-	delete(_m.assignedelasticIps, *_a0.AllocationId)
+	_m.assignedelasticIps.Delete(*_a0.AllocationId)
 	return
 }
 
@@ -1245,14 +1248,17 @@ func (_m *EC2API) DescribeAddresses(_a0 *ec2.DescribeAddressesInput) (output *ec
 		return returns[0].(*ec2.DescribeAddressesOutput), assertedErr
 	}
 	for _, inputIP := range _a0.PublicIps {
-		for allocationId, elasticIP := range _m.assignedelasticIps {
+		_m.assignedelasticIps.Range(func(key, val interface{}) bool {
+			allocationID, _ := key.(string)
+			elasticIP, _ := val.(string)
 			if elasticIP == *inputIP {
 				output.Addresses = append(output.Addresses, &ec2.Address{
-					AllocationId: &allocationId,
+					AllocationId: &allocationID,
 					PublicIp:     inputIP,
 				})
 			}
-		}
+			return true
+		})
 	}
 	return
 }
