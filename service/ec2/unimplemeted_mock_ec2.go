@@ -34903,3 +34903,735 @@ func (_m *EC2API) CreateLocalGatewayRouteWithContext(_a0 context.Context, _a1 *e
 
 	return r0, r1
 }
+func (_m *EC2API) CreateManagedPrefixList(_a0 *ec2.CreateManagedPrefixListInput) (*ec2.CreateManagedPrefixListOutput, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *ec2.CreateManagedPrefixListOutput
+	if rf, ok := ret.Get(0).(func(*ec2.CreateManagedPrefixListInput) *ec2.CreateManagedPrefixListOutput); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.CreateManagedPrefixListOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*ec2.CreateManagedPrefixListInput) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) CreateManagedPrefixListRequest(_a0 *ec2.CreateManagedPrefixListInput) (*request.Request, *ec2.CreateManagedPrefixListOutput) {
+	ret := _m.Called(_a0)
+
+	var r0 *request.Request
+	if rf, ok := ret.Get(0).(func(*ec2.CreateManagedPrefixListInput) *request.Request); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*request.Request)
+		}
+	}
+
+	var r1 *ec2.CreateManagedPrefixListOutput
+	if rf, ok := ret.Get(1).(func(*ec2.CreateManagedPrefixListInput) *ec2.CreateManagedPrefixListOutput); ok {
+		r1 = rf(_a0)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*ec2.CreateManagedPrefixListOutput)
+		}
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) CreateManagedPrefixListWithContext(_a0 context.Context, _a1 *ec2.CreateManagedPrefixListInput, _a2 ...request.Option) (*ec2.CreateManagedPrefixListOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *ec2.CreateManagedPrefixListOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *ec2.CreateManagedPrefixListInput, ...request.Option) *ec2.CreateManagedPrefixListOutput); ok {
+		r0 = rf(_a0, _a1, _a2...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.CreateManagedPrefixListOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *ec2.CreateManagedPrefixListInput, ...request.Option) error); ok {
+		r1 = rf(_a0, _a1, _a2...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) DeleteManagedPrefixList(_a0 *ec2.DeleteManagedPrefixListInput) (*ec2.DeleteManagedPrefixListOutput, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *ec2.DeleteManagedPrefixListOutput
+	if rf, ok := ret.Get(0).(func(*ec2.DeleteManagedPrefixListInput) *ec2.DeleteManagedPrefixListOutput); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.DeleteManagedPrefixListOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*ec2.DeleteManagedPrefixListInput) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) DeleteManagedPrefixListRequest(_a0 *ec2.DeleteManagedPrefixListInput) (*request.Request, *ec2.DeleteManagedPrefixListOutput) {
+	ret := _m.Called(_a0)
+
+	var r0 *request.Request
+	if rf, ok := ret.Get(0).(func(*ec2.DeleteManagedPrefixListInput) *request.Request); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*request.Request)
+		}
+	}
+
+	var r1 *ec2.DeleteManagedPrefixListOutput
+	if rf, ok := ret.Get(1).(func(*ec2.DeleteManagedPrefixListInput) *ec2.DeleteManagedPrefixListOutput); ok {
+		r1 = rf(_a0)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*ec2.DeleteManagedPrefixListOutput)
+		}
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) DeleteManagedPrefixListWithContext(_a0 context.Context, _a1 *ec2.DeleteManagedPrefixListInput, _a2 ...request.Option) (*ec2.DeleteManagedPrefixListOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *ec2.DeleteManagedPrefixListOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *ec2.DeleteManagedPrefixListInput, ...request.Option) *ec2.DeleteManagedPrefixListOutput); ok {
+		r0 = rf(_a0, _a1, _a2...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.DeleteManagedPrefixListOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *ec2.DeleteManagedPrefixListInput, ...request.Option) error); ok {
+		r1 = rf(_a0, _a1, _a2...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) DescribeManagedPrefixLists(_a0 *ec2.DescribeManagedPrefixListsInput) (*ec2.DescribeManagedPrefixListsOutput, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *ec2.DescribeManagedPrefixListsOutput
+	if rf, ok := ret.Get(0).(func(*ec2.DescribeManagedPrefixListsInput) *ec2.DescribeManagedPrefixListsOutput); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.DescribeManagedPrefixListsOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*ec2.DescribeManagedPrefixListsInput) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) DescribeManagedPrefixListsPages(_a0 *ec2.DescribeManagedPrefixListsInput, _a1 func(*ec2.DescribeManagedPrefixListsOutput, bool) bool) error {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*ec2.DescribeManagedPrefixListsInput, func(*ec2.DescribeManagedPrefixListsOutput, bool) bool) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+func (_m *EC2API) DescribeManagedPrefixListsPagesWithContext(_a0 context.Context, _a1 *ec2.DescribeManagedPrefixListsInput, _a2 func(*ec2.DescribeManagedPrefixListsOutput, bool) bool, _a3 ...request.Option) error {
+	_va := make([]interface{}, len(_a3))
+	for _i := range _a3 {
+		_va[_i] = _a3[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1, _a2)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ec2.DescribeManagedPrefixListsInput, func(*ec2.DescribeManagedPrefixListsOutput, bool) bool, ...request.Option) error); ok {
+		r0 = rf(_a0, _a1, _a2, _a3...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+func (_m *EC2API) DescribeManagedPrefixListsRequest(_a0 *ec2.DescribeManagedPrefixListsInput) (*request.Request, *ec2.DescribeManagedPrefixListsOutput) {
+	ret := _m.Called(_a0)
+
+	var r0 *request.Request
+	if rf, ok := ret.Get(0).(func(*ec2.DescribeManagedPrefixListsInput) *request.Request); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*request.Request)
+		}
+	}
+
+	var r1 *ec2.DescribeManagedPrefixListsOutput
+	if rf, ok := ret.Get(1).(func(*ec2.DescribeManagedPrefixListsInput) *ec2.DescribeManagedPrefixListsOutput); ok {
+		r1 = rf(_a0)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*ec2.DescribeManagedPrefixListsOutput)
+		}
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) DescribeManagedPrefixListsWithContext(_a0 context.Context, _a1 *ec2.DescribeManagedPrefixListsInput, _a2 ...request.Option) (*ec2.DescribeManagedPrefixListsOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *ec2.DescribeManagedPrefixListsOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *ec2.DescribeManagedPrefixListsInput, ...request.Option) *ec2.DescribeManagedPrefixListsOutput); ok {
+		r0 = rf(_a0, _a1, _a2...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.DescribeManagedPrefixListsOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *ec2.DescribeManagedPrefixListsInput, ...request.Option) error); ok {
+		r1 = rf(_a0, _a1, _a2...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) GetGroupsForCapacityReservation(_a0 *ec2.GetGroupsForCapacityReservationInput) (*ec2.GetGroupsForCapacityReservationOutput, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *ec2.GetGroupsForCapacityReservationOutput
+	if rf, ok := ret.Get(0).(func(*ec2.GetGroupsForCapacityReservationInput) *ec2.GetGroupsForCapacityReservationOutput); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.GetGroupsForCapacityReservationOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*ec2.GetGroupsForCapacityReservationInput) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) GetGroupsForCapacityReservationPages(_a0 *ec2.GetGroupsForCapacityReservationInput, _a1 func(*ec2.GetGroupsForCapacityReservationOutput, bool) bool) error {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*ec2.GetGroupsForCapacityReservationInput, func(*ec2.GetGroupsForCapacityReservationOutput, bool) bool) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+func (_m *EC2API) GetGroupsForCapacityReservationPagesWithContext(_a0 context.Context, _a1 *ec2.GetGroupsForCapacityReservationInput, _a2 func(*ec2.GetGroupsForCapacityReservationOutput, bool) bool, _a3 ...request.Option) error {
+	_va := make([]interface{}, len(_a3))
+	for _i := range _a3 {
+		_va[_i] = _a3[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1, _a2)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ec2.GetGroupsForCapacityReservationInput, func(*ec2.GetGroupsForCapacityReservationOutput, bool) bool, ...request.Option) error); ok {
+		r0 = rf(_a0, _a1, _a2, _a3...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+func (_m *EC2API) GetGroupsForCapacityReservationRequest(_a0 *ec2.GetGroupsForCapacityReservationInput) (*request.Request, *ec2.GetGroupsForCapacityReservationOutput) {
+	ret := _m.Called(_a0)
+
+	var r0 *request.Request
+	if rf, ok := ret.Get(0).(func(*ec2.GetGroupsForCapacityReservationInput) *request.Request); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*request.Request)
+		}
+	}
+
+	var r1 *ec2.GetGroupsForCapacityReservationOutput
+	if rf, ok := ret.Get(1).(func(*ec2.GetGroupsForCapacityReservationInput) *ec2.GetGroupsForCapacityReservationOutput); ok {
+		r1 = rf(_a0)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*ec2.GetGroupsForCapacityReservationOutput)
+		}
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) GetGroupsForCapacityReservationWithContext(_a0 context.Context, _a1 *ec2.GetGroupsForCapacityReservationInput, _a2 ...request.Option) (*ec2.GetGroupsForCapacityReservationOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *ec2.GetGroupsForCapacityReservationOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *ec2.GetGroupsForCapacityReservationInput, ...request.Option) *ec2.GetGroupsForCapacityReservationOutput); ok {
+		r0 = rf(_a0, _a1, _a2...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.GetGroupsForCapacityReservationOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *ec2.GetGroupsForCapacityReservationInput, ...request.Option) error); ok {
+		r1 = rf(_a0, _a1, _a2...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) GetManagedPrefixListAssociations(_a0 *ec2.GetManagedPrefixListAssociationsInput) (*ec2.GetManagedPrefixListAssociationsOutput, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *ec2.GetManagedPrefixListAssociationsOutput
+	if rf, ok := ret.Get(0).(func(*ec2.GetManagedPrefixListAssociationsInput) *ec2.GetManagedPrefixListAssociationsOutput); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.GetManagedPrefixListAssociationsOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*ec2.GetManagedPrefixListAssociationsInput) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) GetManagedPrefixListAssociationsPages(_a0 *ec2.GetManagedPrefixListAssociationsInput, _a1 func(*ec2.GetManagedPrefixListAssociationsOutput, bool) bool) error {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*ec2.GetManagedPrefixListAssociationsInput, func(*ec2.GetManagedPrefixListAssociationsOutput, bool) bool) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+func (_m *EC2API) GetManagedPrefixListAssociationsPagesWithContext(_a0 context.Context, _a1 *ec2.GetManagedPrefixListAssociationsInput, _a2 func(*ec2.GetManagedPrefixListAssociationsOutput, bool) bool, _a3 ...request.Option) error {
+	_va := make([]interface{}, len(_a3))
+	for _i := range _a3 {
+		_va[_i] = _a3[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1, _a2)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ec2.GetManagedPrefixListAssociationsInput, func(*ec2.GetManagedPrefixListAssociationsOutput, bool) bool, ...request.Option) error); ok {
+		r0 = rf(_a0, _a1, _a2, _a3...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+func (_m *EC2API) GetManagedPrefixListAssociationsRequest(_a0 *ec2.GetManagedPrefixListAssociationsInput) (*request.Request, *ec2.GetManagedPrefixListAssociationsOutput) {
+	ret := _m.Called(_a0)
+
+	var r0 *request.Request
+	if rf, ok := ret.Get(0).(func(*ec2.GetManagedPrefixListAssociationsInput) *request.Request); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*request.Request)
+		}
+	}
+
+	var r1 *ec2.GetManagedPrefixListAssociationsOutput
+	if rf, ok := ret.Get(1).(func(*ec2.GetManagedPrefixListAssociationsInput) *ec2.GetManagedPrefixListAssociationsOutput); ok {
+		r1 = rf(_a0)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*ec2.GetManagedPrefixListAssociationsOutput)
+		}
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) GetManagedPrefixListAssociationsWithContext(_a0 context.Context, _a1 *ec2.GetManagedPrefixListAssociationsInput, _a2 ...request.Option) (*ec2.GetManagedPrefixListAssociationsOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *ec2.GetManagedPrefixListAssociationsOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *ec2.GetManagedPrefixListAssociationsInput, ...request.Option) *ec2.GetManagedPrefixListAssociationsOutput); ok {
+		r0 = rf(_a0, _a1, _a2...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.GetManagedPrefixListAssociationsOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *ec2.GetManagedPrefixListAssociationsInput, ...request.Option) error); ok {
+		r1 = rf(_a0, _a1, _a2...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) GetManagedPrefixListEntries(_a0 *ec2.GetManagedPrefixListEntriesInput) (*ec2.GetManagedPrefixListEntriesOutput, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *ec2.GetManagedPrefixListEntriesOutput
+	if rf, ok := ret.Get(0).(func(*ec2.GetManagedPrefixListEntriesInput) *ec2.GetManagedPrefixListEntriesOutput); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.GetManagedPrefixListEntriesOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*ec2.GetManagedPrefixListEntriesInput) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) GetManagedPrefixListEntriesPages(_a0 *ec2.GetManagedPrefixListEntriesInput, _a1 func(*ec2.GetManagedPrefixListEntriesOutput, bool) bool) error {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*ec2.GetManagedPrefixListEntriesInput, func(*ec2.GetManagedPrefixListEntriesOutput, bool) bool) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+func (_m *EC2API) GetManagedPrefixListEntriesPagesWithContext(_a0 context.Context, _a1 *ec2.GetManagedPrefixListEntriesInput, _a2 func(*ec2.GetManagedPrefixListEntriesOutput, bool) bool, _a3 ...request.Option) error {
+	_va := make([]interface{}, len(_a3))
+	for _i := range _a3 {
+		_va[_i] = _a3[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1, _a2)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *ec2.GetManagedPrefixListEntriesInput, func(*ec2.GetManagedPrefixListEntriesOutput, bool) bool, ...request.Option) error); ok {
+		r0 = rf(_a0, _a1, _a2, _a3...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+func (_m *EC2API) GetManagedPrefixListEntriesRequest(_a0 *ec2.GetManagedPrefixListEntriesInput) (*request.Request, *ec2.GetManagedPrefixListEntriesOutput) {
+	ret := _m.Called(_a0)
+
+	var r0 *request.Request
+	if rf, ok := ret.Get(0).(func(*ec2.GetManagedPrefixListEntriesInput) *request.Request); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*request.Request)
+		}
+	}
+
+	var r1 *ec2.GetManagedPrefixListEntriesOutput
+	if rf, ok := ret.Get(1).(func(*ec2.GetManagedPrefixListEntriesInput) *ec2.GetManagedPrefixListEntriesOutput); ok {
+		r1 = rf(_a0)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*ec2.GetManagedPrefixListEntriesOutput)
+		}
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) GetManagedPrefixListEntriesWithContext(_a0 context.Context, _a1 *ec2.GetManagedPrefixListEntriesInput, _a2 ...request.Option) (*ec2.GetManagedPrefixListEntriesOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *ec2.GetManagedPrefixListEntriesOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *ec2.GetManagedPrefixListEntriesInput, ...request.Option) *ec2.GetManagedPrefixListEntriesOutput); ok {
+		r0 = rf(_a0, _a1, _a2...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.GetManagedPrefixListEntriesOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *ec2.GetManagedPrefixListEntriesInput, ...request.Option) error); ok {
+		r1 = rf(_a0, _a1, _a2...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) ModifyManagedPrefixList(_a0 *ec2.ModifyManagedPrefixListInput) (*ec2.ModifyManagedPrefixListOutput, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *ec2.ModifyManagedPrefixListOutput
+	if rf, ok := ret.Get(0).(func(*ec2.ModifyManagedPrefixListInput) *ec2.ModifyManagedPrefixListOutput); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.ModifyManagedPrefixListOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*ec2.ModifyManagedPrefixListInput) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) ModifyManagedPrefixListRequest(_a0 *ec2.ModifyManagedPrefixListInput) (*request.Request, *ec2.ModifyManagedPrefixListOutput) {
+	ret := _m.Called(_a0)
+
+	var r0 *request.Request
+	if rf, ok := ret.Get(0).(func(*ec2.ModifyManagedPrefixListInput) *request.Request); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*request.Request)
+		}
+	}
+
+	var r1 *ec2.ModifyManagedPrefixListOutput
+	if rf, ok := ret.Get(1).(func(*ec2.ModifyManagedPrefixListInput) *ec2.ModifyManagedPrefixListOutput); ok {
+		r1 = rf(_a0)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*ec2.ModifyManagedPrefixListOutput)
+		}
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) ModifyManagedPrefixListWithContext(_a0 context.Context, _a1 *ec2.ModifyManagedPrefixListInput, _a2 ...request.Option) (*ec2.ModifyManagedPrefixListOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *ec2.ModifyManagedPrefixListOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *ec2.ModifyManagedPrefixListInput, ...request.Option) *ec2.ModifyManagedPrefixListOutput); ok {
+		r0 = rf(_a0, _a1, _a2...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.ModifyManagedPrefixListOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *ec2.ModifyManagedPrefixListInput, ...request.Option) error); ok {
+		r1 = rf(_a0, _a1, _a2...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) RestoreManagedPrefixListVersion(_a0 *ec2.RestoreManagedPrefixListVersionInput) (*ec2.RestoreManagedPrefixListVersionOutput, error) {
+	ret := _m.Called(_a0)
+
+	var r0 *ec2.RestoreManagedPrefixListVersionOutput
+	if rf, ok := ret.Get(0).(func(*ec2.RestoreManagedPrefixListVersionInput) *ec2.RestoreManagedPrefixListVersionOutput); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.RestoreManagedPrefixListVersionOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*ec2.RestoreManagedPrefixListVersionInput) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) RestoreManagedPrefixListVersionRequest(_a0 *ec2.RestoreManagedPrefixListVersionInput) (*request.Request, *ec2.RestoreManagedPrefixListVersionOutput) {
+	ret := _m.Called(_a0)
+
+	var r0 *request.Request
+	if rf, ok := ret.Get(0).(func(*ec2.RestoreManagedPrefixListVersionInput) *request.Request); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*request.Request)
+		}
+	}
+
+	var r1 *ec2.RestoreManagedPrefixListVersionOutput
+	if rf, ok := ret.Get(1).(func(*ec2.RestoreManagedPrefixListVersionInput) *ec2.RestoreManagedPrefixListVersionOutput); ok {
+		r1 = rf(_a0)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*ec2.RestoreManagedPrefixListVersionOutput)
+		}
+	}
+
+	return r0, r1
+}
+
+func (_m *EC2API) RestoreManagedPrefixListVersionWithContext(_a0 context.Context, _a1 *ec2.RestoreManagedPrefixListVersionInput, _a2 ...request.Option) (*ec2.RestoreManagedPrefixListVersionOutput, error) {
+	_va := make([]interface{}, len(_a2))
+	for _i := range _a2 {
+		_va[_i] = _a2[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _a0, _a1)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *ec2.RestoreManagedPrefixListVersionOutput
+	if rf, ok := ret.Get(0).(func(context.Context, *ec2.RestoreManagedPrefixListVersionInput, ...request.Option) *ec2.RestoreManagedPrefixListVersionOutput); ok {
+		r0 = rf(_a0, _a1, _a2...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*ec2.RestoreManagedPrefixListVersionOutput)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *ec2.RestoreManagedPrefixListVersionInput, ...request.Option) error); ok {
+		r1 = rf(_a0, _a1, _a2...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
